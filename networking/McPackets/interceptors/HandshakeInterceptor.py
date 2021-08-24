@@ -1,3 +1,4 @@
+from common.context import Context
 from ..serverbound import Handshake
 from ..SimplePacketInterceptor import SimplePacketInterceptor
 
@@ -5,8 +6,8 @@ class HandshakeInterceptor(SimplePacketInterceptor):
 	NAME = "HandshakeInterceptor"
 	packet_class = Handshake
 
-	def __init__(self, client_addr, server_addr):
-		super().__init__()
+	def __init__(self, context: Context, client_addr, server_addr):
+		super().__init__(context)
 		self.client_addr = client_addr
 		self.server_addr = server_addr
 

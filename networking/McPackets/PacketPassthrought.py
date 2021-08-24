@@ -2,24 +2,16 @@ import select
 import zlib
 
 from common import types
+from common.connection import Connection
+from common.context import Context
 from networking.McPackets import SimplePacket
 from .Buffer import Buffer
 
 class PacketPasstrought:
 	TIME_OUT = 0
 
-	def __init__(self, connection):
-		self.compression_threshold = None
-		self.connection = connection
-		self.protocol_version = None
-
-	def set_compression_threshold(self, value):
-		self.compression_threshold = value
-
-	def set_protocol_version(self, value):
-		self.protocol_version = value
-
-	def change_connection(self, connection):
+	def __init__(self, context: Context, connection: Connection):
+		self.context = context
 		self.connection = connection
 
 	def read_one(self):
@@ -39,7 +31,7 @@ class PacketPasstrought:
 				buffer.write(self.connection.file.read(packet_length - len(buffer.get_writable())))
 			buffer.reset_cursor()
 
-			if self.compression_threshold is not None:
+			if self.context.compression_threshold is not None:
 				compressed_size, _ = types.VarInt.read(buffer)
 				if compressed_size > 0:
 					x = buffer.read(compressed_size)
@@ -60,10 +52,10 @@ class PacketPasstrought:
 	def build_packet(self, packet):
 		buffer = Buffer()
 
-		buffer.write(packet.craft(self.protocol_version))
+		buffer.write(packet.craft(self.context.protocol_version))
 
-		if self.compression_threshold is not None:
-			if len(buffer.get_writable()) > self.compression_threshold != -1:
+		if self.context.compression_threshold is not None:
+			if len(buffer.get_writable()) > self.context.compression_threshold != -1:
 				# compress the current payload
 				uncompressed_data = buffer.get_writable()
 				compressed_data = zlib.compress(uncompressed_data)

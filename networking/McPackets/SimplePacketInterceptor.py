@@ -1,21 +1,15 @@
 import logging
 
 from . import SimplePacket
+from common.context import Context
 
 class SimplePacketInterceptor:
 	NAME = "SimplePacketInterceptor"
 	packet_class = None
 
-	def __init__(self):
+	def __init__(self, context: Context):
 		self.log = logging.getLogger(self.NAME)
-		self.compression_threshold = None
-		self.protocol_version = None
-
-	def set_compression_threshold(self, value):
-		self.compression_threshold = value
-
-	def set_protocol_version(self, value):
-		self.protocol_version = value
+		self.context = context
 
 	def intercept(self, packet: SimplePacket):
 		"""Intercept function

@@ -2,17 +2,20 @@ import zlib
 
 from common.authentication import AuthenticationToken
 from common import types, encryption as encryption_tools
+from common.connection import Connection
+from common.context import Context
 from ..Buffer import Buffer
 from ..clientbound import LoginEncryptionRequest
 from ..serverbound import LoginEncryptionResponse
 from ..SimplePacketInterceptor import SimplePacketInterceptor
 
+
 class EncryptionInterceptor(SimplePacketInterceptor):
 	NAME = "EncryptionInterceptor"
 	packet_class = LoginEncryptionRequest
 
-	def __init__(self, connection, auth_token: AuthenticationToken):
-		super().__init__()
+	def __init__(self, context: Context, connection: Connection, auth_token: AuthenticationToken):
+		super().__init__(context)
 		self.connection = connection
 		self.auth_token = auth_token
 		self.secret = None
@@ -34,11 +37,11 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 
 		buffer = Buffer()
 
-		x= encryption_response.craft(self.protocol_version)
+		x = encryption_response.craft(self.context.protocol_version)
 		buffer.write(x)
 
-		if self.compression_threshold is not None:
-			if len(buffer.get_writable()) > self.compression_threshold != -1:
+		if self.context.compression_threshold is not None:
+			if len(buffer.get_writable()) > self.context.compression_threshold != -1:
 				# compress the current payload
 				uncompressed_data = buffer.get_writable()
 				compressed_data = zlib.compress(uncompressed_data)

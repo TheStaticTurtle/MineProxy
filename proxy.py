@@ -3,13 +3,14 @@ import socket
 import threading
 
 import networking.McPackets as McPackets
+from common.authentication import AuthenticationToken
+from common.connection import Connection
+from common.context import Context
+from common.types import McState
 from networking.McPackets.PacketPassthrought import PacketPasstrought
 from networking.McPackets.interceptors.EncryptionInterceptor import EncryptionInterceptor
 from networking.McPackets.interceptors.HandshakeInterceptor import HandshakeInterceptor
-from common.types import McState
-from common import encryption
-from common.authentication import AuthenticationToken
-from common.connection import Connection
+
 
 class MinecraftProxy(threading.Thread):
 	def __init__(self, server_infos, client_socket_infos, auth_token: AuthenticationToken):
@@ -33,41 +34,33 @@ class MinecraftProxy(threading.Thread):
 			self.__client_sock.close()
 			return
 
-		self.server_connection = Connection(upstreamSock)
-		self.client_connection = Connection(self.__client_sock)
-		self.server_bound_passthrought = PacketPasstrought(self.client_connection)
-		self.client_bound_passthrought = PacketPasstrought(self.server_connection)
+		self.context = Context()
+		self.context.current_state = McState.Handshaking
 
-		self.handshake_spoof_interceptor = HandshakeInterceptor(self.__client_addr, self.__server_addr)
-		self.encryption_interceptor = EncryptionInterceptor(self.server_connection, self.auth_token)
+		self.server_connection = Connection(self.context, upstreamSock)
+		self.client_connection = Connection(self.context, self.__client_sock)
+		self.server_bound_passthrought = PacketPasstrought(self.context, self.client_connection)
+		self.client_bound_passthrought = PacketPasstrought(self.context, self.server_connection)
+
+		self.handshake_spoof_interceptor = HandshakeInterceptor(self.context, self.__client_addr, self.__server_addr)
+		self.encryption_interceptor = EncryptionInterceptor(self.context, self.server_connection, self.auth_token)
+		self.packet_classifier = McPackets.PacketClasifier(self.context)
 
 	def run(self):
-		packet_classifier = McPackets.PacketClasifier()
-		packet_classifier.set_state(self.current_state)
-
 		while True:
 			try:
 				packet = self.server_bound_passthrought.read_one()
-
 				if packet:
-					# if self.current_state == McState.Handshaking or self.current_state == McState.Login or self.current_state == McState.Status:
-					packet, packet_decoded = packet_classifier.classify_serverbound(packet)
+					packet, packet_decoded = self.packet_classifier.classify_serverbound(packet)
 
 					if isinstance(packet, McPackets.serverbound.Handshake):
 						packet = self.handshake_spoof_interceptor.intercept(packet)
-
-						packet_classifier.set_protocol(packet.protocol_version)
-						self.client_bound_passthrought.set_protocol_version(packet.protocol_version)
-						self.server_bound_passthrought.set_protocol_version(packet.protocol_version)
-						self.encryption_interceptor.set_protocol_version(packet.protocol_version)
-						packet_classifier.set_state(packet.next_state)
-						self.protocol_version = packet.protocol_version
-						self.current_state = packet.next_state
+						self.context.protocol_version = packet.protocol_version
+						self.context.current_state = packet.next_state
 
 					if packet:
 						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						self.server_connection.socket.send(self.server_bound_passthrought.build_packet(packet))
-
 
 			except BlockingIOError:
 				pass
@@ -77,23 +70,21 @@ class MinecraftProxy(threading.Thread):
 				self.server_connection.close()
 				return
 
+
 			try:
 				packet = self.client_bound_passthrought.read_one()
 				if packet:
-					# if self.current_state == McState.Handshaking or self.current_state == McState.Login or self.current_state == McState.Status:
-					packet, packet_decoded = packet_classifier.classify_clientbound(packet)
+					packet, packet_decoded = self.packet_classifier.classify_clientbound(packet)
 
 					if isinstance(packet, McPackets.clientbound.LoginSetCompression):
 						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
-						self.encryption_interceptor.set_compression_threshold(packet.threshold)
+						# Send the compression packet before setting the threshold otherwise it would send a compressed packet instead of the uncompressed one
 						self.client_connection.socket.send(self.client_bound_passthrought.build_packet(packet))
-						self.client_bound_passthrought.set_compression_threshold(packet.threshold)
-						self.server_bound_passthrought.set_compression_threshold(packet.threshold)
+						self.context.compression_threshold = packet.threshold
 						packet = None
 
 					if isinstance(packet, McPackets.clientbound.LoginSuccess):
-						packet_classifier.set_state(McState.Play)
-						self.current_state = McState.Play
+						self.context.current_state = McState.Play
 
 					if isinstance(packet, McPackets.clientbound.LoginEncryptionRequest):
 						packet = self.encryption_interceptor.intercept(packet)

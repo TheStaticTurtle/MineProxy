@@ -1,9 +1,11 @@
 import socket
 from common import encryption
+from common.context import Context
 
 
 class Connection:
-	def __init__(self, s: socket.socket):
+	def __init__(self, context: Context, s: socket.socket):
+		self.context = context
 		self.socket = s
 		self.file = s.makefile("rb", 0)
 
