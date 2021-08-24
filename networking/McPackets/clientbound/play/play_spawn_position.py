@@ -10,6 +10,6 @@ class SpawnPosition(SimplePacket.Packet):
 		'location': types.Position,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.location = None

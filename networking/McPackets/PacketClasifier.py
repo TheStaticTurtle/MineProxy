@@ -47,12 +47,12 @@ class Classifier:
 		if self.context.current_state in self.lut_clientbound.keys():
 			if packet.id in self.lut_clientbound[self.context.current_state].keys():
 				P = self.lut_clientbound[self.context.current_state][packet.id]
-				return P.from_basic_packet(packet, self.context.protocol_version), True
+				return P.from_basic_packet(packet), True
 		return packet, False
 
 	def classify_serverbound(self, packet):
 		if self.context.current_state in self.lut_serverbound.keys():
 			if packet.id in self.lut_serverbound[self.context.current_state].keys():
 				P = self.lut_serverbound[self.context.current_state][packet.id]
-				return P.from_basic_packet(packet, self.context.protocol_version), True
+				return P.from_basic_packet(packet), True
 		return packet, False

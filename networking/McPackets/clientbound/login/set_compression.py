@@ -10,6 +10,6 @@ class SetCompression(SimplePacket.Packet):
 		'threshold': types.VarInt,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.threshold = -1

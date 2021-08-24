@@ -13,8 +13,8 @@ class Handshake(SimplePacket.Packet):
 		'_next_state': types.VarInt,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 
 		self.protocol_version = None
 		self.server_address = None

@@ -7,7 +7,7 @@ from common.authentication import AuthenticationToken
 from common.connection import Connection
 from common.context import Context
 from common.types import McState
-from networking.McPackets.PacketPassthrought import PacketPasstrought
+from networking.McPackets.PacketPassthrought import PacketPassthrough
 from networking.McPackets.interceptors.EncryptionInterceptor import EncryptionInterceptor
 from networking.McPackets.interceptors.HandshakeInterceptor import HandshakeInterceptor
 
@@ -39,8 +39,8 @@ class MinecraftProxy(threading.Thread):
 
 		self.server_connection = Connection(self.context, upstreamSock)
 		self.client_connection = Connection(self.context, self.__client_sock)
-		self.server_bound_passthrought = PacketPasstrought(self.context, self.client_connection)
-		self.client_bound_passthrought = PacketPasstrought(self.context, self.server_connection)
+		self.server_bound_passthrought = PacketPassthrough(self.context, self.client_connection)
+		self.client_bound_passthrought = PacketPassthrough(self.context, self.server_connection)
 
 		self.handshake_spoof_interceptor = HandshakeInterceptor(self.context, self.__client_addr, self.__server_addr)
 		self.encryption_interceptor = EncryptionInterceptor(self.context, self.server_connection, self.auth_token)

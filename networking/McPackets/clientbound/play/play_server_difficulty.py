@@ -10,6 +10,6 @@ class ServerDifficulty(SimplePacket.Packet):
 		'difficulty': types.UnsignedByte,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.difficulty = None

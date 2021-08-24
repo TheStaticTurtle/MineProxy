@@ -12,7 +12,7 @@ class PluginMessage(SimplePacket.Packet):
 	}
 	# STRUCTURE_REPR_HIDDEN_FIELDS = ["channel_data"]
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.channel = None
 		self.channel_data = None

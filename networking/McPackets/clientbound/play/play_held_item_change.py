@@ -10,6 +10,6 @@ class HeldItemChanged(SimplePacket.Packet):
 		'slot': types.Byte,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.slot = None

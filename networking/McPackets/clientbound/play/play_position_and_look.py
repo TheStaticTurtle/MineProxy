@@ -15,8 +15,8 @@ class PositionAndLook(SimplePacket.Packet):
 		'flags': types.Byte,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.x = None
 		self.y = None
 		self.z = None

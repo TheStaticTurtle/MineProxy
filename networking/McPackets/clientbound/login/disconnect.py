@@ -10,6 +10,6 @@ class Disconnect(SimplePacket.Packet):
 		'reason': types.JSONString,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.reason = None

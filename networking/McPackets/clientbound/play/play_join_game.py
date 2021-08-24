@@ -16,8 +16,8 @@ class JoinGame(SimplePacket.Packet):
 		'reduced_debug_info': types.Boolean,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.entity_id = None
 		self.gamemode = None
 		self.dimension = None

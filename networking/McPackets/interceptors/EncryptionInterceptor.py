@@ -31,13 +31,13 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 			if self.auth_token is not None:
 				self.auth_token.join(server_id)
 
-		encryption_response = LoginEncryptionResponse()
+		encryption_response = LoginEncryptionResponse(self.context)
 		encryption_response.shared_secret = encrypted_secret
 		encryption_response.verify_secret = token
 
 		buffer = Buffer()
 
-		x = encryption_response.craft(self.context.protocol_version)
+		x = encryption_response.craft()
 		buffer.write(x)
 
 		if self.context.compression_threshold is not None:
@@ -47,7 +47,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 				compressed_data = zlib.compress(uncompressed_data)
 				buffer.reset()
 				# write out the length of the compressed payload
-				buffer.write(types.VarInt.write(len(uncompressed_data)))
+				buffer.write(types.VarInt.write(self.context, len(uncompressed_data)))
 				# write the compressed payload itself
 				buffer.write(compressed_data)
 			else:
@@ -57,7 +57,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 				buffer.write(types.VarInt.write(0))
 				buffer.write(packet_data)
 
-		data = types.VarInt.write(len(buffer.get_writable()))  # Packet Size
+		data = types.VarInt.write(self.context, len(buffer.get_writable()))  # Packet Size
 		data = data + buffer.get_writable()
 
 		self.connection.socket.send(data)

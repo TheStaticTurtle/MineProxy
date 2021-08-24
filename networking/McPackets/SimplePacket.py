@@ -1,16 +1,18 @@
 import json
 
 from common import types
+from common.context import Context
 from common.types import McPacketType, McState
 from networking.McPackets.Buffer import Buffer
-import binascii
 import logging
 
-def create_simple_packet(packet_id, packet_data):
-	packet = Packet()
+
+def create_simple_packet(context: Context, packet_id:int, packet_data: bytes):
+	packet = Packet(context)
 	packet._id = packet_id
 	packet.raw_data = packet_data
 	return packet
+
 
 class Packet:
 	ID = None
@@ -20,7 +22,8 @@ class Packet:
 	}
 	STRUCTURE_REPR_HIDDEN_FIELDS = []
 
-	def __init__(self):
+	def __init__(self, context: Context):
+		self.context = context
 		self.NAME = ""
 		self.NAME += self.TYPE.name + "/" if self.TYPE != McPacketType.Unknown else ""
 		self.NAME += self.SUBTYPE.name + "/" if self.SUBTYPE != McState.Unknown else ""
@@ -41,36 +44,36 @@ class Packet:
 		return self._id
 
 	@classmethod
-	def from_basic_packet(cls, packet, protocol_version):
+	def from_basic_packet(cls, packet):
 		if isinstance(packet, Packet):
 			buffer = Buffer()
 			buffer.write(packet.raw_data)
 			buffer.reset_cursor()
 
-			new_packet = cls()
+			new_packet = cls(packet.context)
 			for key in cls.STRUCTURE.keys():
-				value, _ = cls.STRUCTURE[key].read(buffer)
+				value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
 				new_packet.__setattr__(key, value)
 
 			return new_packet
 		else:
 			raise RuntimeError(f"Can't create {type(cls)} from {type(packet)} ")
 
-	def craft(self, protocol_version):
+	def craft(self):
 		if self._id is None:
 			raise NotImplementedError("Can't craft packet")
 
 		if self.raw_data is not None and len(self.raw_data) > 0:
-			return types.VarInt.write(self._id) + self.raw_data
+			return types.VarInt.write(self.context, self._id) + self.raw_data
 		else:
 			buffer = b""
 			for key in self.STRUCTURE.keys():
 				try:
 					value = self.__getattribute__(key)
-					buffer += self.STRUCTURE[key].write(value)
+					buffer += self.STRUCTURE[key].write(self.context, value)
 				except Exception as e:
 					raise RuntimeError(f"{self.NAME}: Error while writing key {key} for type {self.STRUCTURE[key].__class__.__name__}: {str(e)}")
-			return types.VarInt.write(self._id) + buffer
+			return types.VarInt.write(self.context, self._id) + buffer
 
 	def __str__(self):
 		return repr(self)
@@ -83,7 +86,7 @@ class Packet:
 			for key in self.STRUCTURE.keys():
 				if key in self.STRUCTURE_REPR_HIDDEN_FIELDS or key[1:] in self.STRUCTURE_REPR_HIDDEN_FIELDS:
 					continue
-				if key[0] == "_" and hasattr(self,key[1:]):
+				if key[0] == "_" and hasattr(self, key[1:]):
 					key = key[1:]
 
 				if key in self.STRUCTURE and self.STRUCTURE[key] == types.JSONString:

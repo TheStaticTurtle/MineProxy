@@ -11,8 +11,8 @@ class EncryptionResponse(SimplePacket.Packet):
 		'verify_secret': types.VarIntPrefixedByteArray,
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.shared_secret = None
 		self.verify_secret = None
 

@@ -11,7 +11,7 @@ class PluginMessage(SimplePacket.Packet):
 		'data': types.ByteArray
 	}
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, context):
+		super().__init__(context)
 		self.channel = None
 		self.data = None
