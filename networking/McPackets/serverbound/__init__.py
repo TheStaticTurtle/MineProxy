@@ -1,12 +1,11 @@
-from .handshaking_handshake import Handshake
-from .handshaking_legacyserverping import LegacySeverPing
+from networking.McPackets.serverbound.handshaking.handshake import Handshake
+from networking.McPackets.serverbound.handshaking.legacy_server_ping import LegacySeverPing
 
-from .status_request import StatusRequest
-from .status_ping import StatusPing
+from networking.McPackets.serverbound.status.ping import Ping as StatusPing
+from networking.McPackets.serverbound.status.request import Request as StatusRequest
 
 
-from .login_start import LoginStart
-from .login_encryption_response import LoginEncryptionResponse
-from .login_plugin_response import LoginPluginResponse
+from networking.McPackets.serverbound.login.start import Start as LoginStart
+from networking.McPackets.serverbound.login.encryption_response import EncryptionResponse as LoginEncryptionResponse
 
-from .play_plugin_message import PlayPluginMessage
+from networking.McPackets.serverbound.play.plugin_message import PluginMessage as PlayPluginMessage

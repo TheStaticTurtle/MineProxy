@@ -13,7 +13,6 @@ lut_serverbound = {
 	McState.Login: {
 		0x00: serverbound.LoginStart,
 		0x01: serverbound.LoginEncryptionResponse,
-		0x02: serverbound.LoginPluginResponse,
 	},
 	McState.Play: {
 		0x17: serverbound.PlayPluginMessage,
@@ -32,7 +31,6 @@ lut_clientbound = {
 		0x01: clientbound.LoginEncryptionRequest,
 		0x02: clientbound.LoginSuccess,
 		0x03: clientbound.LoginSetCompression,
-		0x04: clientbound.LoginPluginRequest,
 	},
 	McState.Play: {
 		0x01: clientbound.PlayJoinGame,

@@ -61,10 +61,6 @@ class MinecraftProxy(threading.Thread):
 						self.protocol_version = packet.protocol_version
 						self.current_state = packet.next_state
 
-					if isinstance(packet, McPackets.serverbound.LoginEncryptionResponse):
-						print(packet.verify_secret)
-						print(packet.shared_secret)
-
 					if packet:
 						print(f"Encrypted: {isinstance(self.client_connection.file, encryption.EncryptedFileObjectWrapper)} {packet}")
 						self.server_connection.socket.send(self.server_bound_passthrought.build_packet(packet))

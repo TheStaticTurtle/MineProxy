@@ -28,7 +28,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 			if self.auth_token is not None:
 				self.auth_token.join(server_id)
 
-		encryption_response = LoginEncryptionResponse(0x01, None, None)
+		encryption_response = LoginEncryptionResponse()
 		encryption_response.shared_secret = encrypted_secret
 		encryption_response.verify_secret = token
 

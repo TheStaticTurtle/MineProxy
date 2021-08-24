@@ -1,16 +1,15 @@
-from .status_response import StatusResponse
-from .status_pong import StatusPong
+from networking.McPackets.clientbound.status.response import Response as StatusResponse
+from networking.McPackets.clientbound.status.pong import Pong as StatusPong
 
-from .login_disconnect import LoginDisconnect
-from .login_encryption_request import LoginEncryptionRequest
-from .login_success import LoginSuccess
-from .login_set_compression import LoginSetCompression
-from .login_plugin_request import LoginPluginRequest
+from networking.McPackets.clientbound.login.disconnect import Disconnect as LoginDisconnect
+from networking.McPackets.clientbound.login.encryption_request import EncryptionRequest as LoginEncryptionRequest
+from networking.McPackets.clientbound.login.set_compression import SetCompression as LoginSetCompression
+from networking.McPackets.clientbound.login.success import Success as LoginSuccess
 
-from .play_join_game import PlayJoinGame
-from .play_position_and_look import PlayPositionAndLook
-from .play_server_difficulty import PlayServerDifficulty
-from .play_spawn_position import PlaySpawnPosition
-from .play_plugin_message import PlayPluginMessage
-from .play_held_item_change import PlayHeldItemChanged
-from .play_disconnect import PlayDisconnect
+from networking.McPackets.clientbound.play.play_disconnect import Disconnect as PlayDisconnect
+from networking.McPackets.clientbound.play.play_plugin_message import PluginMessage as PlayPluginMessage
+from networking.McPackets.clientbound.play.play_held_item_change import HeldItemChanged as PlayHeldItemChanged
+from networking.McPackets.clientbound.play.play_spawn_position import SpawnPosition as PlaySpawnPosition
+from networking.McPackets.clientbound.play.play_server_difficulty import ServerDifficulty as PlayServerDifficulty
+from networking.McPackets.clientbound.play.play_join_game import JoinGame as PlayJoinGame
+from networking.McPackets.clientbound.play.play_position_and_look import PositionAndLook as PlayPositionAndLook

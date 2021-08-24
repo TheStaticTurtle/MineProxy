@@ -1,3 +1,4 @@
+import json
 import socket
 import struct
 import uuid
@@ -19,7 +20,7 @@ class Boolean(Type):
 		return struct.unpack('?', file_object.read(1))[0], 1
 
 	@staticmethod
-	def send(value, socket):
+	def write(value):
 		return struct.pack('?', value)
 
 
@@ -29,7 +30,7 @@ class UnsignedByte(Type):
 		return struct.unpack('>B', file_object.read(1))[0], 1
 
 	@staticmethod
-	def send(value, socket):
+	def write(value):
 		return struct.pack('>B', value)
 
 
@@ -39,7 +40,7 @@ class Byte(Type):
 		return struct.unpack('>b', file_object.read(1))[0], 1
 
 	@staticmethod
-	def send(value, socket):
+	def write(value):
 		return struct.pack('>b', value)
 
 
@@ -49,7 +50,7 @@ class Short(Type):
 		return struct.unpack('>h', file_object.read(2))[0], 2
 
 	@staticmethod
-	def send(value, socket):
+	def write(value):
 		return struct.pack('>h', value)
 
 
@@ -69,7 +70,7 @@ class Integer(Type):
 		return struct.unpack('>i', file_object.read(4))[0], 4
 
 	@staticmethod
-	def send(value, socket):
+	def write(value):
 		return struct.pack('>i', value)
 		
 VARINT_SIZE_TABLE = {
@@ -166,14 +167,23 @@ class VarIntPrefixedByteArray(Type):
 	@staticmethod
 	def read(file_object):
 		length, _ = VarInt.read(file_object)
-		print(length)
 		return struct.unpack(str(length) + "s", file_object.read(length))[0], length
 
 	@staticmethod
 	def write(value):
 		out = VarInt.write(len(value))
 		return out + struct.pack(str(len(value)) + "s", value)
-		
+
+class ByteArray(Type):
+	@staticmethod
+	def read(file_object):
+		x = file_object.read(99999999)
+		return x, len(x)
+
+	@staticmethod
+	def write(value: bytes):
+		return struct.pack(str(len(value)) + "s", value)
+
 class String(Type):
 	@staticmethod
 	def read(file_object):
@@ -188,23 +198,76 @@ class String(Type):
 		out = VarInt.write(len(value))
 		return out+value
 
+class JSONString(Type):
+	@staticmethod
+	def read(file_object):
+		length,_ = VarInt.read(file_object)
+		r = file_object.read(length).decode("utf-8")
+
+		return json.loads(r) , -1
+
+	@staticmethod
+	def write(value):
+		value = json.dumps(value).encode('utf-8')
+		out = VarInt.write(len(value))
+		return out+value
 
 class UUID(Type):
 	@staticmethod
 	def read(file_object):
 		return str(uuid.UUID(bytes=file_object.read(16))), 16
 
-class Location(Type):
+class UnsignedLong(Type):
 	@staticmethod
 	def read(file_object):
-		val = struct.unpack('>L', file_object.read(4))[0]
-		x = val >> 38
-		y = val & 0xFFF
-		z = (val << 26 >> 38)
-		return (x,y,z),4
+		return struct.unpack('>Q', file_object.read(8))[0], 8
+
+	@staticmethod
+	def write(value):
+		return struct.pack('>Q', value)
+
+class Position(Type):
+	@staticmethod
+	def read(file_object):
+		location, _ = UnsignedLong.read(file_object)
+		x = int(location >> 38)				# 26 most significant bits
+
+		if False: #context.protocol_later_eq(443):
+			z = int((location >> 12) & 0x3FFFFFF)  # 26 intermediate bits
+			y = int(location & 0xFFF)			  # 12 least signficant bits
+		else:
+			y = int((location >> 26) & 0xFFF)	  # 12 intermediate bits
+			z = int(location & 0x3FFFFFF)		  # 26 least significant bits
+
+		if x >= pow(2, 25):
+			x -= pow(2, 26)
+
+		if y >= pow(2, 11):
+			y -= pow(2, 12)
+
+		if z >= pow(2, 25):
+			z -= pow(2, 26)
+
+		return (x,y,z), _
+
+	@staticmethod
+	def write(position):
+		# 'position' can be either a tuple or Position object.
+		x, y, z = position
+		value = ((x & 0x3FFFFFF) << 38 | (z & 0x3FFFFFF) << 12 | (y & 0xFFF)
+				 if False else #context.protocol_later_eq(443) else
+				 (x & 0x3FFFFFF) << 38 | (y & 0xFFF) << 26 | (z & 0x3FFFFFF))
+		return UnsignedLong.write(value)
+
 
 class McState(Enum):
 	Handshaking = 0
 	Status = 1
 	Login = 2
 	Play = 3
+	Unknown = 4
+
+class McPacketType(Enum):
+	Clientbound = 0
+	ServerBound = 1
+	Unknown = 2

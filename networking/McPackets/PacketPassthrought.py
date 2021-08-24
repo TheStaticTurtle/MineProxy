@@ -51,9 +51,8 @@ class PacketPasstrought:
 			packet_id, packet_id_size = types.VarInt.read(buffer)
 			packet_data = buffer.read_all()
 
-			return SimplePacket.Packet(
+			return SimplePacket.create_simple_packet(
 				packet_id,
-				packet_length - packet_id_size,
 				packet_data
 			)
 		return None
