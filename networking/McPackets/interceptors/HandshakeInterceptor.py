@@ -11,7 +11,7 @@ class HandshakeInterceptor(SimplePacketInterceptor):
 		self.server_addr = server_addr
 
 	def _intercept(self, packet: Handshake):
-		print(f"[HANDSHAKE] Intercepted {packet} spoofing sever ip to: {self.server_addr[0]}")
+		self.log.info(f"Intercepted {packet}, spoofing original sever ip to: {self.server_addr[0]}")
 		packet.server_address =  packet.server_address = self.server_addr[0]
 
 		return packet

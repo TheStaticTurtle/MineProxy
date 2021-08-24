@@ -1,3 +1,5 @@
+import logging
+
 from . import SimplePacket
 
 class SimplePacketInterceptor:
@@ -5,6 +7,7 @@ class SimplePacketInterceptor:
 	packet_class = None
 
 	def __init__(self):
+		self.log = logging.getLogger(self.NAME)
 		self.compression_threshold = None
 		self.protocol_version = None
 

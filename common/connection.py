@@ -1,4 +1,6 @@
 import socket
+from common import encryption
+
 
 class Connection:
 	def __init__(self, s: socket.socket):
@@ -8,3 +10,7 @@ class Connection:
 	def close(self):
 		self.file.close()
 		self.socket.close()
+
+	@property
+	def encrypted(self):
+		return isinstance(self.file, encryption.EncryptedFileObjectWrapper)

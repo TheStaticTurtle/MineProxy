@@ -1,3 +1,4 @@
+import logging
 import socket
 import threading
 
@@ -13,6 +14,8 @@ from common.connection import Connection
 class MinecraftProxy(threading.Thread):
 	def __init__(self, server_infos, client_socket_infos, auth_token: AuthenticationToken):
 		threading.Thread.__init__(self)
+		self.log = logging.getLogger("Proxy")
+		self.log.info("Hellow world")
 		self.auth_token = auth_token
 		self.__client_sock, self.__client_addr = client_socket_infos
 		self.__server_addr = server_infos
@@ -20,13 +23,13 @@ class MinecraftProxy(threading.Thread):
 		self.current_state = McState.Handshaking
 		self.protocol_version = 0
 
-		print("[+] New thread started for "+str(self.__client_addr)+" bridging to "+str(self.__server_addr))
+		self.log.info(f"New thread started for {self.__client_addr} bridging to {self.__server_addr}")
 
 		upstreamSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
 			upstreamSock.connect(self.__server_addr)
 		except ConnectionRefusedError:
-			print("[+] Cloud not connect to "+str(self.__server_addr))
+			self.log.error(f"Cloud not connect to {self.__server_addr}")
 			self.__client_sock.close()
 			return
 
@@ -62,14 +65,14 @@ class MinecraftProxy(threading.Thread):
 						self.current_state = packet.next_state
 
 					if packet:
-						print(f"Encrypted: {isinstance(self.client_connection.file, encryption.EncryptedFileObjectWrapper)} {packet}")
+						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						self.server_connection.socket.send(self.server_bound_passthrought.build_packet(packet))
 
 
 			except BlockingIOError:
 				pass
 			except ConnectionAbortedError:
-				print("[+] "+str(self.__client_addr)+" closed connection to "+str(self.__server_addr))
+				self.log.error(f"{self.__client_addr} closed connection to {self.__server_addr}")
 				self.client_connection.close()
 				self.server_connection.close()
 				return
@@ -81,7 +84,7 @@ class MinecraftProxy(threading.Thread):
 					packet, packet_decoded = packet_classifier.classify_clientbound(packet)
 
 					if isinstance(packet, McPackets.clientbound.LoginSetCompression):
-						print(f"Encrypted: {isinstance(self.server_connection.file, encryption.EncryptedFileObjectWrapper)} {packet}")
+						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						self.encryption_interceptor.set_compression_threshold(packet.threshold)
 						self.client_connection.socket.send(self.client_bound_passthrought.build_packet(packet))
 						self.client_bound_passthrought.set_compression_threshold(packet.threshold)
@@ -96,13 +99,13 @@ class MinecraftProxy(threading.Thread):
 						packet = self.encryption_interceptor.intercept(packet)
 
 					if packet:
-						print(f"Encrypted: {isinstance(self.server_connection.file, encryption.EncryptedFileObjectWrapper)} {packet}")
+						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						self.client_connection.socket.send(self.client_bound_passthrought.build_packet(packet))
 
 			except BlockingIOError:
 				pass
 			except ConnectionAbortedError:
-				print("[+] "+str(self.__client_addr)+" closed connection to "+str(self.__server_addr))
+				self.log.error(f"{self.__client_addr} closed connection to {self.__server_addr}")
 				self.client_connection.close()
 				self.server_connection.close()
 				return
@@ -113,6 +116,8 @@ class MinecraftProxyManager(threading.Thread):
 	"""docstring for ClassName"""
 	def __init__(self, server_ip, server_port=25565, listen_port=25565, auth_token=None):
 		super(MinecraftProxyManager, self).__init__()
+		self.log = logging.getLogger("Proxy/Manager")
+		self.log.info("Hellow world")
 		self.auth_token = auth_token
 		self.server_ip = server_ip
 		self.server_port = server_port
@@ -123,6 +128,7 @@ class MinecraftProxyManager(threading.Thread):
 		server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		server.bind(("0.0.0.0", self.listen_port))
 		server.settimeout(1)
+		self.log.info("Running waiting for clients")
 
 		clients = []
 

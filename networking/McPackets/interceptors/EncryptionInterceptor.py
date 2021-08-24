@@ -18,7 +18,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 		self.secret = None
 
 	def _intercept(self, packet: LoginEncryptionRequest):
-		print(f"[ENCRYPTION] Intercepted {packet}")
+		self.log.info(f"Intercepted {packet}, crafting response")
 		self.secret = encryption_tools.generate_shared_secret()
 		token, encrypted_secret = encryption_tools.encrypt_token_and_secret(packet.public_key, packet.verify_secret, self.secret)
 
@@ -59,7 +59,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 
 		self.connection.socket.send(data)
 
-		print(f"[ENCRYPTION] Responded {encryption_response}")
+		self.log.info(f"Responded with {encryption_response}")
 
 		cipher = encryption_tools.create_AES_cipher(self.secret)
 		encryptor = cipher.encryptor()
@@ -67,4 +67,4 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 
 		self.connection.socket = encryption_tools.EncryptedSocketWrapper(self.connection.socket, encryptor, decryptor)
 		self.connection.file = encryption_tools.EncryptedFileObjectWrapper(self.connection.file, decryptor)
-		print(f"[ENCRYPTION] Updated sockets")
+		self.log.debug(f"Connection socket updated")

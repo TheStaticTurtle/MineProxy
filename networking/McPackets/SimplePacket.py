@@ -33,6 +33,9 @@ class Packet:
 		for key in self.STRUCTURE.keys():
 			setattr(self, key, None)
 
+	def is_basic(self):
+		return self.__class__ == Packet
+
 	@property
 	def id(self):
 		return self._id
@@ -74,7 +77,7 @@ class Packet:
 
 	def __repr__(self):
 		r = f"<{self.NAME} "
-		if self.__class__ == Packet:
+		if self.is_basic():
 			return r + f"id=0x{self._id:02x} len={len(self.raw_data)}>"
 		else:
 			for key in self.STRUCTURE.keys():

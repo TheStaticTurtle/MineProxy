@@ -1,6 +1,8 @@
 """
 Handles authentication with the Mojang authentication server.
 """
+import logging
+
 import requests
 import json
 
@@ -64,6 +66,8 @@ class AuthenticationToken(object):
         self.username = username
         self.access_token = access_token
         self.client_token = client_token
+        self.log = logging.getLogger("Auth/Token")
+        self.log.info("Hellow world")
         self.profile = Profile()
 
     @property
@@ -100,6 +104,7 @@ class AuthenticationToken(object):
         Raises:
             minecraft.exceptions.YggdrasilError
         """
+        self.log.info(f"Logging in with email: {username}")
         payload = {
             "agent": {
                 "name": self.AGENT_NAME,
@@ -121,6 +126,8 @@ class AuthenticationToken(object):
         self.profile.id_ = json_resp["selectedProfile"]["id"]
         self.profile.name = json_resp["selectedProfile"]["name"]
 
+        self.log.info(f"Logged in, username: {json_resp['selectedProfile']['name']}")
+
         return True
 
     def refresh(self):
@@ -136,6 +143,7 @@ class AuthenticationToken(object):
             ValueError - if `AuthenticationToken.access_token` or
                 `AuthenticationToken.client_token` isn't set.
         """
+        self.log.info(f"Refreshing token")
         if self.access_token is None:
             raise ValueError("'access_token' not set!'")
 
@@ -154,6 +162,8 @@ class AuthenticationToken(object):
         self.client_token = json_resp["clientToken"]
         self.profile.id_ = json_resp["selectedProfile"]["id"]
         self.profile.name = json_resp["selectedProfile"]["name"]
+
+        self.log.info(f"Logged in, username: {json_resp['selectedProfile']['name']}")
 
         return True
 
@@ -229,6 +239,8 @@ class AuthenticationToken(object):
         if not self.authenticated:
             err = "AuthenticationToken hasn't been authenticated yet!"
             raise YggdrasilError(err)
+
+        self.log.info(f"Joining server: {server_id}")
 
         req = _make_request(SESSION_SERVER, "join",
                             {"accessToken": self.access_token,
