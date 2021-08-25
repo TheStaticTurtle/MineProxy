@@ -54,8 +54,8 @@ class Packet:
 			for key in cls.STRUCTURE.keys():
 				value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
 				new_packet.__setattr__(key, value)
-
 			return new_packet
+
 		else:
 			raise RuntimeError(f"Can't create {type(cls)} from {type(packet)} ")
 
@@ -73,6 +73,7 @@ class Packet:
 					buffer += self.STRUCTURE[key].write(self.context, value)
 				except Exception as e:
 					raise RuntimeError(f"{self.NAME}: Error while writing key {key} for type {self.STRUCTURE[key].__class__.__name__}: {str(e)}")
+
 			return types.VarInt.write(self.context, self._id) + buffer
 
 	def __str__(self):

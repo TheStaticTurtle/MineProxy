@@ -33,11 +33,18 @@ lut_clientbound = {
 		0x03: clientbound.login.SetCompression,
 	},
 	McState.Play: {
+		0x00: clientbound.play.KeepAlive,
 		0x01: clientbound.play.JoinGame,
-		0x41: clientbound.play.ServerDifficulty,
+		0x02: clientbound.play.ChatMessage,
+		0x03: clientbound.play.TimeUpdate,
+		0x04: clientbound.play.EntityEquipment,
 		0x05: clientbound.play.SpawnPosition,
-		0x3f: clientbound.play.PluginMessage,
+		0x06: clientbound.play.UpdateHealth,
+		0x07: clientbound.play.Respawn,
+		# 0x08: clientbound.play.,
 		0x09: clientbound.play.HeldItemChanged,
+		0x41: clientbound.play.ServerDifficulty,
+		0x3f: clientbound.play.PluginMessage,
 		0x40: clientbound.play.Disconnect,
 	}
 }
