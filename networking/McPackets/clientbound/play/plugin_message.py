@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class PluginMessage(SimplePacket.Packet):
-	ID = 0x3F
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -15,3 +14,7 @@ class PluginMessage(SimplePacket.Packet):
 		super().__init__(context)
 		self.channel = None
 		self.data = None
+
+	@property
+	def ID(self):
+		return 0x3F

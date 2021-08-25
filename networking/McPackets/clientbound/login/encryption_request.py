@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class EncryptionRequest(SimplePacket.Packet):
-	ID = 0x01
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
 	STRUCTURE = {
@@ -17,6 +16,10 @@ class EncryptionRequest(SimplePacket.Packet):
 		self.server_id = None
 		self.public_key = None
 		self.verify_secret = None
+
+	@property
+	def ID(self):
+		return 0x01
 
 	def __repr__(self):
 		return f"<{self.NAME} public_key_lenght={len(self.public_key)} verify_secret_lenght={len(self.verify_secret)}>"

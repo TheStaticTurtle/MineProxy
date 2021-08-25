@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class Handshake(SimplePacket.Packet):
-	ID = 0x00
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Handshaking
 	STRUCTURE = {
@@ -20,6 +19,10 @@ class Handshake(SimplePacket.Packet):
 		self.server_address = None
 		self.server_port = None
 		self._next_state = None
+
+	@property
+	def ID(self):
+		return 0x00
 
 	@property
 	def next_state(self):

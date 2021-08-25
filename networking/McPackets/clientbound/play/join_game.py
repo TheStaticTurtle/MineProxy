@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class JoinGame(SimplePacket.Packet):
-	ID = 0x01
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -25,3 +24,7 @@ class JoinGame(SimplePacket.Packet):
 		self.max_players = None
 		self.level_type = None
 		self.reduced_debug_info = None
+
+	@property
+	def ID(self):
+		return 0x01

@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class Respawn(SimplePacket.Packet):
-	ID = 0x07
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -19,3 +18,7 @@ class Respawn(SimplePacket.Packet):
 		self.difficulty = None
 		self.gamemode = None
 		self.level_type = None
+
+	@property
+	def ID(self):
+		return 0x07

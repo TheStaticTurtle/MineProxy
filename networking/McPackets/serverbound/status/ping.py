@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class Ping(SimplePacket.Packet):
-	ID = 0x01
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Status
 	STRUCTURE = {
@@ -13,3 +12,7 @@ class Ping(SimplePacket.Packet):
 	def __init__(self, context):
 		super().__init__(context)
 		self.payload = None
+
+	@property
+	def ID(self):
+		return 0x01

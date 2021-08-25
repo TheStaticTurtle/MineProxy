@@ -9,13 +9,12 @@ import logging
 
 def create_simple_packet(context: Context, packet_id:int, packet_data: bytes):
 	packet = Packet(context)
-	packet._id = packet_id
+	packet.raw_id = packet_id
 	packet.raw_data = packet_data
 	return packet
 
 
 class Packet:
-	ID = None
 	TYPE = McPacketType.Unknown
 	SUBTYPE = McState.Unknown
 	STRUCTURE = {
@@ -29,7 +28,7 @@ class Packet:
 		self.NAME += self.SUBTYPE.name + "/" if self.SUBTYPE != McState.Unknown else ""
 		self.NAME += self.__class__.__name__
 
-		self._id = self.ID
+		self.raw_id = None
 		self.raw_data = None
 		self.log = logging.getLogger(self.NAME)
 
@@ -40,8 +39,8 @@ class Packet:
 		return self.__class__ == Packet
 
 	@property
-	def id(self):
-		return self._id
+	def ID(self):
+		return self.raw_id
 
 	@classmethod
 	def from_basic_packet(cls, packet):
@@ -60,11 +59,11 @@ class Packet:
 			raise RuntimeError(f"Can't create {type(cls)} from {type(packet)} ")
 
 	def craft(self):
-		if self._id is None:
+		if self.ID is None:
 			raise NotImplementedError("Can't craft packet")
 
 		if self.raw_data is not None and len(self.raw_data) > 0:
-			return types.VarInt.write(self.context, self._id) + self.raw_data
+			return types.VarInt.write(self.context, self.ID) + self.raw_data
 		else:
 			buffer = b""
 			for key in self.STRUCTURE.keys():
@@ -74,7 +73,7 @@ class Packet:
 				except Exception as e:
 					raise RuntimeError(f"{self.NAME}: Error while writing key {key} for type {self.STRUCTURE[key].__class__.__name__}: {str(e)}")
 
-			return types.VarInt.write(self.context, self._id) + buffer
+			return types.VarInt.write(self.context, self.ID) + buffer
 
 	def __str__(self):
 		return repr(self)
@@ -82,7 +81,7 @@ class Packet:
 	def __repr__(self):
 		r = f"<{self.NAME} "
 		if self.is_basic():
-			return r + f"id=0x{self._id:02x} len={len(self.raw_data)}>"
+			return r + f"id=0x{self.ID:02x} len={len(self.raw_data)}>"
 		else:
 			for key in self.STRUCTURE.keys():
 				if key in self.STRUCTURE_REPR_HIDDEN_FIELDS or key[1:] in self.STRUCTURE_REPR_HIDDEN_FIELDS:
@@ -95,3 +94,4 @@ class Packet:
 				else:
 					r += f"{key}={self.__getattribute__(key)} "
 		return r[:-1] + ">"
+

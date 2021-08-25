@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class UpdateHealth(SimplePacket.Packet):
-	ID = 0x06
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -17,3 +16,7 @@ class UpdateHealth(SimplePacket.Packet):
 		self.health = None
 		self.food = None
 		self.food_saturation = None
+
+	@property
+	def ID(self):
+		return 0x06

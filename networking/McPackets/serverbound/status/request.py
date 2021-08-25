@@ -4,8 +4,11 @@ from common import types
 
 
 class Request(SimplePacket.Packet):
-	ID = 0x00
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Status
 	STRUCTURE = {
 	}
+
+	@property
+	def ID(self):
+		return 0x00

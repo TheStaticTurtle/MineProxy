@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class PositionAndLook(SimplePacket.Packet):
-	ID = 0x08
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -23,3 +22,8 @@ class PositionAndLook(SimplePacket.Packet):
 		self.yaw = None
 		self.pitch = None
 		self.flags = None
+
+	@property
+	def ID(self):
+		return 0x08
+

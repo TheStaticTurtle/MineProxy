@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class EntityEquipment(SimplePacket.Packet):
-	ID = 0x04
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -17,3 +16,7 @@ class EntityEquipment(SimplePacket.Packet):
 		self.entity_id = None
 		self.slot = None
 		self.item = None
+
+	@property
+	def ID(self):
+		return 0x04

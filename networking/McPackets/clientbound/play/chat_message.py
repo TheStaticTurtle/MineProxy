@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class ChatMessage(SimplePacket.Packet):
-	ID = 0x02
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -15,3 +14,7 @@ class ChatMessage(SimplePacket.Packet):
 		super().__init__(context)
 		self.data = None
 		self.position = None
+
+	@property
+	def ID(self):
+		return 0x02

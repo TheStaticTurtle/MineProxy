@@ -3,7 +3,6 @@ from networking.McPackets import SimplePacket
 from common import types
 
 class Disconnect(SimplePacket.Packet):
-	ID = 0x40
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
@@ -13,3 +12,7 @@ class Disconnect(SimplePacket.Packet):
 	def __init__(self, context):
 		super().__init__(context)
 		self.reason = None
+
+	@property
+	def ID(self):
+		return 0x40
