@@ -53,7 +53,7 @@ class MinecraftProxy(threading.Thread):
 				if packet:
 					packet, packet_decoded = self.packet_classifier.classify_serverbound(packet)
 
-					if isinstance(packet, McPackets.serverbound.Handshake):
+					if isinstance(packet, McPackets.serverbound.handshaking.Handshake):
 						packet = self.handshake_spoof_interceptor.intercept(packet)
 						self.context.protocol_version = packet.protocol_version
 						self.context.current_state = packet.next_state
@@ -76,17 +76,17 @@ class MinecraftProxy(threading.Thread):
 				if packet:
 					packet, packet_decoded = self.packet_classifier.classify_clientbound(packet)
 
-					if isinstance(packet, McPackets.clientbound.LoginSetCompression):
+					if isinstance(packet, McPackets.clientbound.login.SetCompression):
 						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						# Send the compression packet before setting the threshold otherwise it would send a compressed packet instead of the uncompressed one
 						self.client_connection.socket.send(self.client_bound_passthrought.build_packet(packet))
 						self.context.compression_threshold = packet.threshold
 						packet = None
 
-					if isinstance(packet, McPackets.clientbound.LoginSuccess):
+					if isinstance(packet, McPackets.clientbound.login.Success):
 						self.context.current_state = McState.Play
 
-					if isinstance(packet, McPackets.clientbound.LoginEncryptionRequest):
+					if isinstance(packet, McPackets.clientbound.login.EncryptionRequest):
 						packet = self.encryption_interceptor.intercept(packet)
 
 					if packet:

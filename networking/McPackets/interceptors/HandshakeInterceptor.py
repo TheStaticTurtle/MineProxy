@@ -1,5 +1,5 @@
 from common.context import Context
-from ..serverbound import Handshake
+from ..serverbound.handshaking import Handshake
 from ..SimplePacketInterceptor import SimplePacketInterceptor
 
 class HandshakeInterceptor(SimplePacketInterceptor):

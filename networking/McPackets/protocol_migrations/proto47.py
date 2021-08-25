@@ -3,19 +3,19 @@ from common.types import McState
 
 lut_serverbound = {
 	McState.Handshaking: {
-		0x00: serverbound.Handshake,
-		0xFE: serverbound.LegacySeverPing
+		0x00: serverbound.handshaking.Handshake,
+		0xFE: serverbound.handshaking.LegacySeverPing
 	},
 	McState.Status: {
-		0x00: serverbound.StatusRequest,
-		0x01: serverbound.StatusPing
+		0x00: serverbound.status.Request,
+		0x01: serverbound.status.Ping
 	},
 	McState.Login: {
-		0x00: serverbound.LoginStart,
-		0x01: serverbound.LoginEncryptionResponse,
+		0x00: serverbound.login.Start,
+		0x01: serverbound.login.EncryptionResponse,
 	},
 	McState.Play: {
-		0x17: serverbound.PlayPluginMessage,
+		0x17: serverbound.play.PluginMessage,
 	}
 }
 
@@ -23,22 +23,22 @@ lut_clientbound = {
 	McState.Handshaking: {
 	},
 	McState.Status: {
-		0x00: clientbound.StatusResponse,
-		0x01: clientbound.StatusPong,
+		0x00: clientbound.status.Response,
+		0x01: clientbound.status.Pong,
 	},
 	McState.Login: {
-		0x00: clientbound.LoginDisconnect,
-		0x01: clientbound.LoginEncryptionRequest,
-		0x02: clientbound.LoginSuccess,
-		0x03: clientbound.LoginSetCompression,
+		0x00: clientbound.login.Disconnect,
+		0x01: clientbound.login.EncryptionRequest,
+		0x02: clientbound.login.Success,
+		0x03: clientbound.login.SetCompression,
 	},
 	McState.Play: {
-		0x01: clientbound.PlayJoinGame,
-		0x41: clientbound.PlayServerDifficulty,
-		0x05: clientbound.PlaySpawnPosition,
-		0x3f: clientbound.PlayPluginMessage,
-		0x09: clientbound.PlayHeldItemChanged,
-		0x40: clientbound.PlayDisconnect,
+		0x01: clientbound.play.JoinGame,
+		0x41: clientbound.play.ServerDifficulty,
+		0x05: clientbound.play.SpawnPosition,
+		0x3f: clientbound.play.PluginMessage,
+		0x09: clientbound.play.HeldItemChanged,
+		0x40: clientbound.play.Disconnect,
 	}
 }
 

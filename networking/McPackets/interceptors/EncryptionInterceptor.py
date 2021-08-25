@@ -5,14 +5,14 @@ from common import types, encryption as encryption_tools
 from common.connection import Connection
 from common.context import Context
 from ..Buffer import Buffer
-from ..clientbound import LoginEncryptionRequest
-from ..serverbound import LoginEncryptionResponse
+from ..clientbound.login import EncryptionRequest
+from ..serverbound.login import EncryptionResponse
 from ..SimplePacketInterceptor import SimplePacketInterceptor
 
 
 class EncryptionInterceptor(SimplePacketInterceptor):
 	NAME = "EncryptionInterceptor"
-	packet_class = LoginEncryptionRequest
+	packet_class = EncryptionRequest
 
 	def __init__(self, context: Context, connection: Connection, auth_token: AuthenticationToken):
 		super().__init__(context)
@@ -20,7 +20,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 		self.auth_token = auth_token
 		self.secret = None
 
-	def _intercept(self, packet: LoginEncryptionRequest):
+	def _intercept(self, packet: EncryptionRequest):
 		self.log.info(f"Intercepted {packet}, crafting response")
 		self.secret = encryption_tools.generate_shared_secret()
 		token, encrypted_secret = encryption_tools.encrypt_token_and_secret(packet.public_key, packet.verify_secret, self.secret)
@@ -31,7 +31,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 			if self.auth_token is not None:
 				self.auth_token.join(server_id)
 
-		encryption_response = LoginEncryptionResponse(self.context)
+		encryption_response = EncryptionResponse(self.context)
 		encryption_response.shared_secret = encrypted_secret
 		encryption_response.verify_secret = token
 
@@ -54,7 +54,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 				# write out a 0 to indicate uncompressed data
 				packet_data = buffer.get_writable()
 				buffer.reset()
-				buffer.write(types.VarInt.write(0))
+				buffer.write(types.VarInt.write(self.context, 0))
 				buffer.write(packet_data)
 
 		data = types.VarInt.write(self.context, len(buffer.get_writable()))  # Packet Size

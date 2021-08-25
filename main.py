@@ -1,4 +1,6 @@
+from dotenv import load_dotenv
 import sys
+import os
 import time
 from common import authentication
 import proxy
@@ -12,15 +14,21 @@ coloredlogs.install(level='DEBUG', stream=sys.stdout, fmt="[%(asctime)s] [%(name
 log = logging.getLogger("main")
 log.info("Hellow world")
 
+load_dotenv()
+
 auth_token = authentication.AuthenticationToken()
 try:
-	auth_token.authenticate("tuglersamuel@gmail.com", "TZnkMw8vF1s0B")
+	auth_token.authenticate(os.getenv("MINEPROXY_AUTH_MINECRAFT_EMAIL"), os.getenv("MINEPROXY_AUTH_MINECRAFT_PASSWORD"))
 except authentication.YggdrasilError as e:
 	log.error(f"Error occured while logging in", e)
 	sys.exit()
 
-proxy = proxy.MinecraftProxyManager("192.168.1.33", server_port=25565, listen_port=25565, auth_token=auth_token)
-# proxy = proxy.MinecraftProxyManager("mc.hypixel.net", server_port=25565, listen_port=25565, auth_token=auth_token)
+proxy = proxy.MinecraftProxyManager(
+	os.getenv("MINEPROXY_PROXY_REMOTE_IP"),
+	server_port=int(os.getenv("MINEPROXY_PROXY_REMOTE_PORT")),
+	listen_port=int(os.getenv("MINEPROXY_PROXY_LISTEN_PORT")),
+	auth_token=auth_token
+)
 proxy.start()
 
 while True:
