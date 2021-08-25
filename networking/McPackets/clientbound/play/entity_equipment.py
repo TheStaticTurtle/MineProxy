@@ -1,4 +1,6 @@
-from common.types import McPacketType, McState
+import common.types.common
+import common.types.complex
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,9 +8,9 @@ class EntityEquipment(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'entity_id': types.VarInt,
-		'slot': types.Short,
-		'item': types.Slot,
+		'entity_id': common.types.common.VarInt,
+		'slot': common.types.common.Short,
+		'item': common.types.complex.Slot,
 	}
 
 	def __init__(self, context):

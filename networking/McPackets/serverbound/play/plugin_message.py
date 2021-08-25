@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,8 +7,8 @@ class PluginMessage(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Login
 	STRUCTURE = {
-		'channel': types.String,
-		'channel_data': types.ByteArray,
+		'channel': common.types.common.String,
+		'channel_data': common.types.common.ByteArray,
 	}
 	# STRUCTURE_REPR_HIDDEN_FIELDS = ["channel_data"]
 

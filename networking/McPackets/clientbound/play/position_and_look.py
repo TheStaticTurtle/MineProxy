@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,12 +7,12 @@ class PositionAndLook(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'x': types.Double,
-		'y': types.Double,
-		'z': types.Double,
-		'yaw': types.Float,
-		'pitch': types.Float,
-		'flags': types.Byte,
+		'x': common.types.common.Double,
+		'y': common.types.common.Double,
+		'z': common.types.common.Double,
+		'yaw': common.types.common.Float,
+		'pitch': common.types.common.Float,
+		'flags': common.types.common.Byte,
 	}
 
 	def __init__(self, context):

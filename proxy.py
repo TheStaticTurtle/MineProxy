@@ -6,7 +6,7 @@ import networking.McPackets as McPackets
 from common.authentication import AuthenticationToken
 from common.connection import Connection
 from common.context import Context
-from common.types import McState
+from common.types.enums import McState
 from networking.McPackets.PacketPassthrought import PacketPassthrough
 from networking.McPackets.interceptors.EncryptionInterceptor import EncryptionInterceptor
 from networking.McPackets.interceptors.HandshakeInterceptor import HandshakeInterceptor

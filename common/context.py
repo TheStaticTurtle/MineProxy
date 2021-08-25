@@ -1,5 +1,6 @@
 import logging
 
+import common.types.enums
 from common import types
 
 class Context:
@@ -40,7 +41,7 @@ class Context:
 		return self._current_state
 
 	@current_state.setter
-	def current_state(self, value: types.McState):
+	def current_state(self, value: common.types.enums.McState):
 		self._current_state = value
 		for fn in self._on_current_state_change_callbacks:
 			fn()

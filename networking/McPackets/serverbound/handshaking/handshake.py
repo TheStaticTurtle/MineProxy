@@ -1,15 +1,16 @@
-from common.types import McPacketType, McState
+import common.types.common
+import common.types.enums
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
-from common import types
 
 class Handshake(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Handshaking
 	STRUCTURE = {
-		'protocol_version': types.VarInt,
-		'server_address': types.String,
-		'server_port': types.UnsignedShort,
-		'_next_state': types.VarInt,
+		'protocol_version': common.types.common.VarInt,
+		'server_address': common.types.common.String,
+		'server_port': common.types.common.UnsignedShort,
+		'_next_state': common.types.common.VarInt,
 	}
 
 	def __init__(self, context):
@@ -26,8 +27,8 @@ class Handshake(SimplePacket.Packet):
 
 	@property
 	def next_state(self):
-		return types.McState(int(self._next_state))
+		return McState(int(self._next_state))
 
 	@next_state.setter
-	def next_state(self, value: types.McState):
+	def next_state(self, value: common.types.enums.McState):
 		self._next_state = value.value

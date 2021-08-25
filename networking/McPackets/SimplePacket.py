@@ -1,8 +1,10 @@
 import json
 
+import common.types.common
+import common.types.complex
 from common import types
 from common.context import Context
-from common.types import McPacketType, McState
+from common.types.enums import McState, McPacketType
 from networking.McPackets.Buffer import Buffer
 import logging
 
@@ -63,7 +65,7 @@ class Packet:
 			raise NotImplementedError("Can't craft packet")
 
 		if self.raw_data is not None and len(self.raw_data) > 0:
-			return types.VarInt.write(self.context, self.ID) + self.raw_data
+			return common.types.common.VarInt.write(self.context, self.ID) + self.raw_data
 		else:
 			buffer = b""
 			for key in self.STRUCTURE.keys():
@@ -73,7 +75,7 @@ class Packet:
 				except Exception as e:
 					raise RuntimeError(f"{self.NAME}: Error while writing key {key} for type {self.STRUCTURE[key].__class__.__name__}: {str(e)}")
 
-			return types.VarInt.write(self.context, self.ID) + buffer
+			return common.types.common.VarInt.write(self.context, self.ID) + buffer
 
 	def __str__(self):
 		return repr(self)
@@ -89,7 +91,7 @@ class Packet:
 				if key[0] == "_" and hasattr(self, key[1:]):
 					key = key[1:]
 
-				if key in self.STRUCTURE and self.STRUCTURE[key] == types.JSONString:
+				if key in self.STRUCTURE and self.STRUCTURE[key] == common.types.complex.JSONString:
 					r += f"{key}={json.dumps(self.__getattribute__(key))} "
 				else:
 					r += f"{key}={self.__getattribute__(key)} "

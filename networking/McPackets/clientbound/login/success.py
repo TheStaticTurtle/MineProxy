@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,8 +7,8 @@ class Success(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
 	STRUCTURE = {
-		'uuid': types.String,
-		'username': types.String,
+		'uuid': common.types.common.String,
+		'username': common.types.common.String,
 	}
 
 	def __init__(self, context):

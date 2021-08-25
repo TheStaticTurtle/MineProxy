@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,10 +7,10 @@ class Respawn(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'dimension': types.Integer,
-		'difficulty': types.UnsignedByte,
-		'gamemode': types.UnsignedByte,
-		'level_type': types.String,
+		'dimension': common.types.common.Integer,
+		'difficulty': common.types.common.UnsignedByte,
+		'gamemode': common.types.common.UnsignedByte,
+		'level_type': common.types.common.String,
 	}
 
 	def __init__(self, context):

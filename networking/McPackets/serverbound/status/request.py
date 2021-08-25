@@ -1,4 +1,4 @@
-from common.types import McPacketType, McState
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 

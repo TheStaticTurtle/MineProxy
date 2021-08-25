@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,9 +7,9 @@ class UpdateHealth(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'health': types.Float,
-		'food': types.VarInt,
-		'food_saturation': types.Float,
+		'health': common.types.common.Float,
+		'food': common.types.common.VarInt,
+		'food_saturation': common.types.common.Float,
 	}
 
 	def __init__(self, context):

@@ -1,5 +1,6 @@
 import zlib
 
+import common.types.common
 from common.authentication import AuthenticationToken
 from common import types, encryption as encryption_tools
 from common.connection import Connection
@@ -47,17 +48,17 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 				compressed_data = zlib.compress(uncompressed_data)
 				buffer.reset()
 				# write out the length of the compressed payload
-				buffer.write(types.VarInt.write(self.context, len(uncompressed_data)))
+				buffer.write(common.types.common.VarInt.write(self.context, len(uncompressed_data)))
 				# write the compressed payload itself
 				buffer.write(compressed_data)
 			else:
 				# write out a 0 to indicate uncompressed data
 				packet_data = buffer.get_writable()
 				buffer.reset()
-				buffer.write(types.VarInt.write(self.context, 0))
+				buffer.write(common.types.common.VarInt.write(self.context, 0))
 				buffer.write(packet_data)
 
-		data = types.VarInt.write(self.context, len(buffer.get_writable()))  # Packet Size
+		data = common.types.common.VarInt.write(self.context, len(buffer.get_writable()))  # Packet Size
 		data = data + buffer.get_writable()
 
 		self.connection.socket.send(data)

@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,8 +7,8 @@ class EncryptionResponse(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Login
 	STRUCTURE = {
-		'shared_secret': types.VarIntPrefixedByteArray,
-		'verify_secret': types.VarIntPrefixedByteArray,
+		'shared_secret': common.types.common.VarIntPrefixedByteArray,
+		'verify_secret': common.types.common.VarIntPrefixedByteArray,
 	}
 
 	def __init__(self, context):

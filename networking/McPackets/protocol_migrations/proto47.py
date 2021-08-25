@@ -1,5 +1,5 @@
 from networking.McPackets import serverbound, clientbound
-from common.types import McState
+from common.types.enums import McState
 
 lut_serverbound = {
 	McState.Handshaking: {

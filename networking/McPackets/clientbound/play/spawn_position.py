@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.complex
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,7 +7,7 @@ class SpawnPosition(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'location': types.Position,
+		'location': common.types.complex.Position,
 	}
 
 	def __init__(self, context):

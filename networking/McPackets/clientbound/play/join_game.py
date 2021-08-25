@@ -1,4 +1,5 @@
-from common.types import McPacketType, McState
+import common.types.common
+from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
@@ -6,13 +7,13 @@ class JoinGame(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'entity_id': types.Integer,
-		'gamemode': types.UnsignedByte,
-		'dimension': types.Byte,
-		'difficulty': types.UnsignedByte,
-		'max_players': types.UnsignedByte,
-		'level_type': types.String,
-		'reduced_debug_info': types.Boolean,
+		'entity_id': common.types.common.Integer,
+		'gamemode': common.types.common.UnsignedByte,
+		'dimension': common.types.common.Byte,
+		'difficulty': common.types.common.UnsignedByte,
+		'max_players': common.types.common.UnsignedByte,
+		'level_type': common.types.common.String,
+		'reduced_debug_info': common.types.common.Boolean,
 	}
 
 	def __init__(self, context):
