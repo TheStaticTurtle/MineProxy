@@ -10,6 +10,7 @@ from common.types import McState
 from networking.McPackets.PacketPassthrought import PacketPassthrough
 from networking.McPackets.interceptors.EncryptionInterceptor import EncryptionInterceptor
 from networking.McPackets.interceptors.HandshakeInterceptor import HandshakeInterceptor
+from networking.McPackets.interceptors.LoginStartInterceptor import LoginStartInterceptor
 
 
 class MinecraftProxy(threading.Thread):
@@ -42,8 +43,11 @@ class MinecraftProxy(threading.Thread):
 		self.server_bound_passthrought = PacketPassthrough(self.context, self.client_connection)
 		self.client_bound_passthrought = PacketPassthrough(self.context, self.server_connection)
 
-		self.handshake_spoof_interceptor = HandshakeInterceptor(self.context, self.__client_addr, self.__server_addr)
-		self.encryption_interceptor = EncryptionInterceptor(self.context, self.server_connection, self.auth_token)
+		self.interceptors = [
+			HandshakeInterceptor(self.context, self.__client_addr, self.__server_addr),
+			EncryptionInterceptor(self.context, self.server_connection, self.auth_token),
+			LoginStartInterceptor(self.context, self.auth_token.profile),
+		]
 		self.packet_classifier = McPackets.PacketClasifier(self.context)
 
 	def run(self):
@@ -53,8 +57,11 @@ class MinecraftProxy(threading.Thread):
 				if packet:
 					packet, packet_decoded = self.packet_classifier.classify_serverbound(packet)
 
+					for interceptor in self.interceptors:
+						if isinstance(packet, interceptor.packet_class):
+							packet = interceptor.intercept(packet)
+
 					if isinstance(packet, McPackets.serverbound.handshaking.Handshake):
-						packet = self.handshake_spoof_interceptor.intercept(packet)
 						self.context.protocol_version = packet.protocol_version
 						self.context.current_state = packet.next_state
 
@@ -76,6 +83,10 @@ class MinecraftProxy(threading.Thread):
 				if packet:
 					packet, packet_decoded = self.packet_classifier.classify_clientbound(packet)
 
+					for interceptor in self.interceptors:
+						if isinstance(packet, interceptor.packet_class):
+							packet = interceptor.intercept(packet)
+
 					if isinstance(packet, McPackets.clientbound.login.SetCompression):
 						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
 						# Send the compression packet before setting the threshold otherwise it would send a compressed packet instead of the uncompressed one
@@ -85,9 +96,6 @@ class MinecraftProxy(threading.Thread):
 
 					if isinstance(packet, McPackets.clientbound.login.Success):
 						self.context.current_state = McState.Play
-
-					if isinstance(packet, McPackets.clientbound.login.EncryptionRequest):
-						packet = self.encryption_interceptor.intercept(packet)
 
 					if packet:
 						self.log.debug(f"Encrypted:{'✔' if self.server_connection.encrypted else '❌'}  {packet}")
