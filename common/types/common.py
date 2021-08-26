@@ -131,7 +131,7 @@ class Float(Type):
 		return struct.unpack('>f', file_object.read(4))[0], 4
 
 	@staticmethod
-	def write(context, value):
+	def write(h, value):
 		return struct.pack('>f', value)
 
 

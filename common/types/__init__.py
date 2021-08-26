@@ -1,8 +1,8 @@
 class Type(object):
 	@staticmethod
 	def read(context, file_object):
-		raise NotImplementedError("Base data type not serializable")
+		raise NotImplementedError("Read method is not implemented")
 
 	@staticmethod
 	def write(context, value):
-		raise NotImplementedError("Base data type not serializable")
+		raise NotImplementedError("Write method is not implemented")

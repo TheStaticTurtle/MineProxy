@@ -53,12 +53,21 @@ class Packet:
 
 			new_packet = cls(packet.context)
 			for key in cls.STRUCTURE.keys():
-				value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
-				new_packet.__setattr__(key, value)
+				try:
+					value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
+					new_packet.__setattr__(key, value)
+				except Exception as e:
+					raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
+
+			new_packet.apply_meta_fields()
+
 			return new_packet
 
 		else:
 			raise RuntimeError(f"Can't create {type(cls)} from {type(packet)} ")
+
+	def apply_meta_fields(self):
+		pass
 
 	def craft(self):
 		if self.ID is None:

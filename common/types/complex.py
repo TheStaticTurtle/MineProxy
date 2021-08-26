@@ -1,10 +1,11 @@
 import io
 import json
+import logging
 
 import pynbt
 
-from common.types import Type
-from common.types.common import VarInt, UnsignedLong, Short, Byte
+from common.types import adapters
+from common.types.common import *
 
 
 class JSONString(Type):
@@ -20,7 +21,6 @@ class JSONString(Type):
 		value = json.dumps(value).encode('utf-8')
 		out = VarInt.write(context, len(value))
 		return out + value
-
 
 class Position(Type):
 	@staticmethod
@@ -56,7 +56,6 @@ class Position(Type):
 			value = (x & 0x3FFFFFF) << 38 | (y & 0xFFF) << 26 | (z & 0x3FFFFFF)
 			return UnsignedLong.write(context, value)
 
-
 class NBT(Type):
 	@staticmethod
 	def read(context, file_object):
@@ -67,7 +66,6 @@ class NBT(Type):
 		buffer = io.BytesIO()
 		pynbt.NBTFile(value=value).save(buffer)
 		return buffer.getvalue()
-
 
 class Slot(Type):
 	def __init__(self, context):
@@ -125,3 +123,107 @@ class Slot(Type):
 
 			return out
 		return b""
+
+class Float3Rotation(Type):
+	def __init__(self):
+		self.pitch = None
+		self.yaw = None
+		self.roll = None
+
+	@staticmethod
+	def read(context, file_object):
+		r = Float3Rotation()
+		r.pitch, _ = Float.read(context, file_object)
+		r.yaw, _ = Float.read(context, file_object)
+		r.roll, _ = Float.read(context, file_object)
+		return r, -1
+
+	@staticmethod
+	def write(context, value):
+		out  = Float.write(context, value.pitch)
+		out += Float.write(context, value.yaw)
+		out += Float.write(context, value.roll)
+		return out
+
+class Int3Position(Type):
+	def __init__(self):
+		self.x = None
+		self.y = None
+		self.z = None
+
+	@staticmethod
+	def read(context, file_object):
+		r = Int3Position()
+		r.x, _ = Integer.read(context, file_object)
+		r.y, _ = Integer.read(context, file_object)
+		r.z, _ = Integer.read(context, file_object)
+		return r, -1
+
+	@staticmethod
+	def write(context, value):
+		out  = Integer.write(context, value.x)
+		out += Integer.write(context, value.y)
+		out += Integer.write(context, value.z)
+		return out
+
+class EntityMetadata(Type):
+	def __init__(self):
+		self.values = {}
+
+	def __repr__(self):
+		return f"<Metadata values={self.values}>"
+
+	@staticmethod
+	def read(context, file_object):
+		TYPES = {
+			0: Byte,
+			1: Short,
+			2: Integer,
+			3: Float,
+			4: String,
+			5: Slot,
+			6: Int3Position,
+			7: Float3Rotation,
+		}
+
+		m = EntityMetadata()
+		try:
+			while True:
+				item, _ = UnsignedByte.read(context, file_object)
+				if item == 0x7F:
+					break
+				index = item & 0x1F
+				type = TYPES[item >> 5]
+
+				m.values[index] = {
+					"item": item,
+					"type": type,
+					"value": type.read(context, file_object)[0]
+				}
+		except Exception as e:
+			logging.getLogger("EntityMetadataType").error(f"Error, {e} (Packet might not have been terminated correctly)")
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out = b""
+		for index in value.values.keys():
+			out += UnsignedByte.write(context, value.values[index]["item"])
+			out += value.values[index]["type"].write(context, value.values[index]["value"])
+		return out + b"\x7F"
+
+
+class Angle(UnsignedByte):
+	@staticmethod
+	def read(context, file_object):
+		v, l = UnsignedByte.read(context, file_object)
+		return 360 * v / 256, l
+
+	@staticmethod
+	def write(context, value):
+		return UnsignedByte.write(context, round(256 * ((value % 360) / 360)))
+
+FixedPointInteger = adapters.FixedPoint(Integer)
+FixedPointByte = adapters.FixedPoint(Byte)
+
+VelocityShort = adapters.Velocity(Short)
