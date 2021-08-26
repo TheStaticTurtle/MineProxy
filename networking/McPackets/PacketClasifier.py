@@ -1,5 +1,6 @@
 import logging
 from common.context import Context
+from common.types.enums import McState
 from networking.McPackets.protocol_migrations import proto47
 
 def merge_dicts_rec(*kwarg):
@@ -55,8 +56,9 @@ class LutManager:
 		return serverbound_lut, clientbound_lut
 
 class Classifier:
-	def __init__(self, context: Context):
+	def __init__(self, context: Context, parse_play_packets=True):
 		self.context = context
+		self.parse_play_packets = parse_play_packets
 		self.context.add_protocol_change_callback(self._update_lut)
 		self.manager = LutManager()
 		self._update_lut(version=self.manager.get_lowest_protocol_version())
@@ -68,6 +70,8 @@ class Classifier:
 			self.lut_serverbound, self.lut_clientbound = self.manager.get_luts_for_protocol_version(self.context.protocol_version)
 
 	def classify_clientbound(self, packet):
+		if self.context.current_state == McState.Play and not self.parse_play_packets:
+			return packet, False
 		if self.context.current_state in self.lut_clientbound.keys():
 			if packet.ID in self.lut_clientbound[self.context.current_state].keys():
 				P = self.lut_clientbound[self.context.current_state][packet.ID]
@@ -76,6 +80,8 @@ class Classifier:
 		return packet, False
 
 	def classify_serverbound(self, packet):
+		if self.context.current_state == McState.Play and not self.parse_play_packets:
+			return packet, False
 		if self.context.current_state in self.lut_serverbound.keys():
 			if packet.ID in self.lut_serverbound[self.context.current_state].keys():
 				P = self.lut_serverbound[self.context.current_state][packet.ID]

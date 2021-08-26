@@ -1,4 +1,5 @@
 import logging
+import os
 import socket
 import threading
 
@@ -48,7 +49,10 @@ class MinecraftProxy(threading.Thread):
 			EncryptionInterceptor(self.context, self.server_connection, self.auth_token),
 			LoginStartInterceptor(self.context, self.auth_token.profile),
 		]
-		self.packet_classifier = McPackets.PacketClasifier(self.context)
+		self.packet_classifier = McPackets.PacketClasifier(
+			self.context,
+			parse_play_packets= True if os.getenv("MINEPROXY_PARSE_PLAY_PACKETS") == "True" else False
+		)
 
 	def run(self):
 		while True:
