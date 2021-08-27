@@ -1,3 +1,4 @@
+import logging
 import typing
 from enum import Enum
 
@@ -24,17 +25,17 @@ class BooleanPrefixedOptional(Type):
 		return out
 
 
-class EnumVarTnt(Type):
-	def __init__(self, enum: typing.Type[Enum]):
+class EnumGeneric(Type):
+	def __init__(self, value_type: typing.Type[Type], enum: typing.Type[Enum]):
+		self.value_type = value_type
 		self.enum = enum
 
 	def read(self, context, file_object):
-		value, _ = VarInt.read(context, file_object)
+		value, _ = self.value_type.read(context, file_object)
 		return self.enum(value), _
 
 	def write(self, context, value: Enum):
-		return VarInt.write(context, value.value)
-
+		return self.value_type.write(context, value.value)
 
 class FixedPoint(Type):
 	__slots__ = 'type', 'denominator'
@@ -64,3 +65,28 @@ class Velocity(Type):
 
 	def write(self, context, value):
 		return self.type.write(context, int(value * self.divider))
+
+
+class PrefixedArray(Type):
+	__slots__ = 'element_count_type', 'element_type'
+
+	def __init__(self, element_count_type: typing.Type[Type], element_type: typing.Type[Type]):
+		self.element_count_type = element_count_type
+		self.element_type = element_type
+
+	def read(self, context, file_object):
+		elements = []
+		element_count, _ = self.element_count_type.read(context, file_object)
+		for i in range(element_count):
+			try:
+				x, _ = self.element_type.read(context, file_object)
+				elements.append(x)
+			except Exception as e:
+				logging.getLogger(f"PrefixedArray<{self.element_count_type.__class__.__name__}>").warning(f"Read {i}/{element_count} : {e}")
+		return elements, 0
+
+	def write(self, context, values):
+		out = self.element_count_type.write(context, len(values))
+		for value in values:
+			out += self.element_type.write(context, value)
+		return out

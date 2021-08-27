@@ -195,10 +195,14 @@ class String(Type):
 		return out + value
 
 
-class UUID(Type, ABC):
+class UUID(Type):
 	@staticmethod
 	def read(context, file_object):
 		return str(uuid.UUID(bytes=file_object.read(16))), 16
+
+	@staticmethod
+	def write(context, value):
+		return uuid.UUID(value).bytes
 
 
 class UnsignedLong(Type):

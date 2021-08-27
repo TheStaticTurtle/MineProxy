@@ -42,6 +42,11 @@ class Buffer(_SocketEmulation):
     def reset(self):
         self.bytes = io.BytesIO()
 
+    def peek(self, count):
+        all_bytes = self.bytes.getvalue()
+        current_pos = self.bytes.tell()
+        return all_bytes[current_pos+1:current_pos+1+count]
+
     def reset_cursor(self):
         self.bytes.seek(0)
 

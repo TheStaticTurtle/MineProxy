@@ -29,3 +29,33 @@ class Direction(Enum):
 	South = 3
 	West = 4
 	East = 5
+
+class GameStateChangeReason(Enum):
+	InvalidBed = 0
+	EndRaining = 1
+	BeginRaining = 2
+	ChangeGameMode = 3
+	EnterCredits = 4
+	DemoMessage = 5
+	ArrowHittingPlayer = 6
+	FadeValue = 7
+	FadeTime = 8
+	PlayMobAppearance = 9
+
+class UpdateEntityAction(Enum):
+	SetSpawnPotentials = 1
+	SetCommandBlockText = 2
+	SetBeaconLevel = 3
+	SetMobHeadRotation = 4
+	SetFlowerType = 5
+	SetBanner = 6
+
+class ScoreboardPosition(Enum):
+	List = 0
+	Sidebar = 1
+	BellowName = 2
+
+class CombatEventEvent(Enum):
+	EnterCombat = 0
+	EndCombat = 1
+	EntityDead = 2

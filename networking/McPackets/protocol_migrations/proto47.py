@@ -65,10 +65,48 @@ lut_clientbound = {
 		0x1D: clientbound.play.EntityEffect,
 		0x1E: clientbound.play.RemoveEntityEffect,
 		0x1F: clientbound.play.SetExperience,
-
-		0x3f: clientbound.play.PluginMessage,
+		0x20: clientbound.play.EntityProperties,
+		0x21: clientbound.play.ChunkData,
+		0x22: clientbound.play.MultiBlockChange,
+		0x23: clientbound.play.BlockChange,
+		0x24: clientbound.play.BlockAction,
+		0x25: clientbound.play.BlockBreakAnimation,
+		# 0x26: clientbound.play., # TODO: Nope not tonight see: map chunk bulk
+		0x27: clientbound.play.Explosion,
+		0x28: clientbound.play.Effect,
+		0x29: clientbound.play.SoundEffect,
+		0x2A: clientbound.play.Particle,
+		0x2B: clientbound.play.ChangeGameState,
+		0x2C: clientbound.play.SpawnGlobalEntity,
+		0x2D: clientbound.play.OpenWindow,
+		0x2E: clientbound.play.CloseWindow,
+		0x2F: clientbound.play.SetSlot,
+		0x30: clientbound.play.WindowItems,
+		0x31: clientbound.play.WindowProperty,
+		0x32: clientbound.play.ConfirmTransaction,
+		0x33: clientbound.play.UpdateSign,
+		# 0x34: clientbound.play., # TODO: Nope not tonight see: map
+		0x35: clientbound.play.UpdateBlockEntity,
+		0x36: clientbound.play.OpenSignEditor,
+		0x37: clientbound.play.Statistics,
+		# 0x38: clientbound.play., # TODO: Nope not tonight see: player list item
+		0x39: clientbound.play.PlayerAbilitites,
+		0x3A: clientbound.play.TabComplete,
+		0x3B: clientbound.play.ScoreboardObjective,
+		0x3C: clientbound.play.UpdateScore,
+		0x3D: clientbound.play.DisplayScoreboard,
+		0x3E: clientbound.play.Teams,
+		0x3F: clientbound.play.PluginMessage,
 		0x40: clientbound.play.Disconnect,
 		0x41: clientbound.play.ServerDifficulty,
+		0x42: clientbound.play.CombatEvent,
+		0x43: clientbound.play.Camera,
+		# 0x44: clientbound.play., # TODO: Nope not tonight see: world border
+		# 0x45: clientbound.play., # TODO: Nope not tonight see: title
+		0x46: clientbound.play.SetCompression,
+		0x47: clientbound.play.PlayerListHeaderAndFooter,
+		0x48: clientbound.play.RessourcePackSend,
+		0x49: clientbound.play.UpdateEntityNBT,
 	}
 }
 

@@ -6,6 +6,7 @@ import pynbt
 
 from common.types import adapters
 from common.types.common import *
+from common.types.enums import GameStateChangeReason, UpdateEntityAction, ScoreboardPosition, CombatEventEvent
 
 
 class JSONString(Type):
@@ -201,7 +202,7 @@ class EntityMetadata(Type):
 					"value": type.read(context, file_object)[0]
 				}
 		except Exception as e:
-			logging.getLogger("EntityMetadataType").error(f"Error, {e} (Packet might not have been terminated correctly)")
+			logging.getLogger("EntityMetadataType").warning(f"Error, {e} (Packet might not have been terminated correctly)")
 		return m, 0
 
 	@staticmethod
@@ -213,7 +214,7 @@ class EntityMetadata(Type):
 		return out + b"\x7F"
 
 
-class Angle(UnsignedByte):
+class Angle(Type):
 	@staticmethod
 	def read(context, file_object):
 		v, l = UnsignedByte.read(context, file_object)
@@ -227,3 +228,161 @@ FixedPointInteger = adapters.FixedPoint(Integer)
 FixedPointByte = adapters.FixedPoint(Byte)
 
 VelocityShort = adapters.Velocity(Short)
+
+class AttributeModifier(Type):
+	def __init__(self):
+		self.uuid = None
+		self.amount = None
+		self.operation = None
+
+	def __repr__(self):
+		return f"<AttributeModifier uuid={self.uuid} amount={self.amount} operation={self.operation}>"
+
+	@staticmethod
+	def read(context, file_object):
+		m = AttributeModifier()
+		m.uuid, _ = UUID.read(context, file_object)
+		m.amount, _ = Double.read(context, file_object)
+		m.operation, _ = Byte.read(context, file_object)
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out  = UUID.write(context, value.uuid)
+		out += Double.write(context, value.amount)
+		out += Byte.write(context, value.operation)
+		return out
+
+AttributeModifierArray = adapters.PrefixedArray(VarInt, AttributeModifier)
+
+class Properties(Type):
+	def __init__(self):
+		self.key = None
+		self.value = None
+		self.modifiers_array = None
+
+	def __repr__(self):
+		return f"<Properties key={self.key} value={self.value} modifiers_array={self.modifiers_array}>"
+
+	@staticmethod
+	def read(context, file_object):
+		m = Properties()
+		m.key, _ = String.read(context, file_object)
+		m.value, _ = Double.read(context, file_object)
+		m.modifiers_array, _ = AttributeModifierArray.read(context, file_object)
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out  = String.write(context, value.key)
+		out += Double.write(context, value.value)
+		out += AttributeModifierArray.write(context, value.modifiers_array)
+		return out
+
+PropertiesArray = adapters.PrefixedArray(Integer, Properties)
+
+
+class ChunkRecord(Type):
+	def __init__(self):
+		self.horizontal_position = None
+		self.y_coordinate = None
+		self.block_id = None
+
+	def __repr__(self):
+		return f"<ChunkRecord horizontal_position={self.horizontal_position} y_coordinate={self.y_coordinate} block_id={self.block_id}>"
+
+	@staticmethod
+	def read(context, file_object):
+		m = ChunkRecord()
+		m.horizontal_position, _ = UnsignedByte.read(context, file_object)
+		m.y_coordinate, _ = UnsignedByte.read(context, file_object)
+		m.block_id, _ = VarInt.read(context, file_object)
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out  = UnsignedByte.write(context, value.horizontal_position)
+		out += UnsignedByte.write(context, value.y_coordinate)
+		out += VarInt.write(context, value.block_id)
+		return out
+
+ChunkRecordArray = adapters.PrefixedArray(VarInt, ChunkRecord)
+
+class ExplosionRecord(Type):
+	def __init__(self):
+		self.byte_1 = None
+		self.byte_2 = None
+		self.byte_3 = None
+
+	def __repr__(self):
+		return f"<ExplosionRecord byte_1={self.byte_1} byte_2={self.byte_2} byte_3={self.byte_3}>"
+
+	@staticmethod
+	def read(context, file_object):
+		m = ChunkRecord()
+		m.byte_1, _ = UnsignedByte.read(context, file_object)
+		m.byte_2, _ = UnsignedByte.read(context, file_object)
+		m.byte_3, _ = UnsignedByte.read(context, file_object)
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out  = UnsignedByte.write(context, value.byte_1)
+		out += UnsignedByte.write(context, value.byte_2)
+		out += UnsignedByte.write(context, value.byte_3)
+		return out
+
+ExplosionRecordArray = adapters.PrefixedArray(VarInt, ExplosionRecord)
+
+GameStateChangeReasonEnum = adapters.EnumGeneric(UnsignedByte, GameStateChangeReason)
+
+SlotShortArray = adapters.PrefixedArray(Short, Slot)
+
+UpdateEntityActionEnum = adapters.EnumGeneric(UnsignedByte, UpdateEntityAction)
+
+
+class OptionalNBT(Type):
+	@staticmethod
+	def read(context, file_object):
+		x = file_object.peek(1)
+		if x != b"\x00":
+			# file_object.seek(-1, whence=io.SEEK_CUR)
+			return pynbt.NBTFile(io=file_object), 0
+		return None, 0
+
+	@staticmethod
+	def write(context, value):
+		if value is None:
+			return b"\x00"
+		else:
+			buffer = io.BytesIO()
+			pynbt.NBTFile(value=value).save(buffer)
+			return buffer.getvalue()
+
+class Statistic(Type):
+	def __init__(self):
+		self.name = None
+		self.value = None
+
+	def __repr__(self):
+		return f"<Statistic name={self.name} value={self.value}>"
+
+	@staticmethod
+	def read(context, file_object):
+		m = ChunkRecord()
+		m.name, _ = String.read(context, file_object)
+		m.value, _ = VarInt.read(context, file_object)
+		return m, 0
+
+	@staticmethod
+	def write(context, value):
+		out  = String.write(context, value.name)
+		out += VarInt.write(context, value.value)
+		return out
+
+StatisticArray = adapters.PrefixedArray(VarInt, Statistic)
+
+VarIntStringArray = adapters.PrefixedArray(VarInt, String)
+
+ScoreboardPositionEnum = adapters.EnumGeneric(Byte, ScoreboardPosition)
+CombatEventEventEnum = adapters.EnumGeneric(VarInt, CombatEventEvent)
