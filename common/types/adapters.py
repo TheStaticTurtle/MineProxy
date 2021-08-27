@@ -9,14 +9,13 @@ from common.types.common import Boolean, VarInt
 class BooleanPrefixedOptional(Type):
 	def __init__(self, type: typing.Type[Type]):
 		self.type = type
-		self.value = None
 
 	def read(self, context, file_object):
 		is_present, _ = Boolean.read(context, file_object)
 		if is_present:
-			self.value, _ = self.type.read(context, file_object)
-		else:
-			self.value = None
+			value, _ = self.type.read(context, file_object)
+			return value, 0
+		return None, 0
 
 	def write(self, context, value):
 		out = Boolean.write(context, value is not None)

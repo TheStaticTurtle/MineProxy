@@ -325,7 +325,7 @@ class ExplosionRecord(Type):
 		out += UnsignedByte.write(context, value.byte_2)
 		out += UnsignedByte.write(context, value.byte_3)
 		return out
-ExplosionRecordArray = adapters.PrefixedArray(VarInt, ExplosionRecord)
+ExplosionRecordArray = adapters.PrefixedArray(Integer, ExplosionRecord)
 
 GameStateChangeReasonEnum = adapters.EnumGeneric(UnsignedByte, GameStateChangeReason)
 SlotShortArray = adapters.PrefixedArray(Short, Slot)
@@ -391,3 +391,5 @@ ClientSettingsChatModesEnum = adapters.EnumGeneric(Byte, ClientSettingsChatModes
 ClientStatusActionsEnums = adapters.EnumGeneric(VarInt, ClientStatusActions)
 
 ResourcePackStatusResultEnum = adapters.EnumGeneric(VarInt, ResourcePackStatusResult)
+
+AnimationAnimationEnum = adapters.EnumGeneric(UnsignedByte, Animation)

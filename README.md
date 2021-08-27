@@ -8,8 +8,8 @@ This proxy isn't a simple TCP tunnel, it fully implements the base of the Minecr
 The proxy uses Minecraft protocol [47](https://wiki.vg/index.php?title=Protocol&oldid=7368) as it's base, but will be updated to more recent versions  
   
 ## Warning
-This tool is still in construction things might change
-
+This tool is still in construction things might change. Moreover packets are not all tested (most of them are tho).
+If you disable play packets you might be able to use this tool for unsupported protocol versions
 ## Config  
   
 | Environment variable | Use |  
@@ -45,4 +45,4 @@ The base is V47 but let's imagine we want to support packets from protocol V109,
 A packet was removed from V47 in V109? Just set the packet ID to None, and it will be like it's not there.  
   
 ## License  
-See LICENSE.md
+See [LICENSE.md](https://github.com/TheStaticTurtle/MineProxy/blob/master/LICENSE.md)

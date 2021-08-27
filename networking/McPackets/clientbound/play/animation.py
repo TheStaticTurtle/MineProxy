@@ -8,22 +8,14 @@ class Animation(SimplePacket.Packet):
 	SUBTYPE = McState.Play
 	STRUCTURE = {
 		'entity_id': common.types.common.VarInt,
-		'_animation': common.types.common.UnsignedByte,
+		'animation': common.types.complex.AnimationAnimationEnum,
 	}
 
 	def __init__(self, context):
 		super().__init__(context)
 		self.entity_id = None
-		self._animation = None
+		self.animation = None
 
 	@property
 	def ID(self):
 		return 0x0B
-
-	@property
-	def animation(self):
-		return McState(int(self._animation))
-
-	@animation.setter
-	def animation(self, value: common.types.enums.Animation):
-		self._animation = value.value

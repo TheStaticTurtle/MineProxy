@@ -40,7 +40,7 @@ class UseEntity(SimplePacket.Packet):
 		try:
 			new_packet.target, _ = cls.STRUCTURE["target"].read(packet.context, buffer)
 			new_packet.type, _ = cls.STRUCTURE["type"].read(packet.context, buffer)
-			if new_packet.type == UseEntityType:
+			if new_packet.type == UseEntityType.InteractAt:
 				new_packet.target_x, _ = cls.STRUCTURE["target_x"].read(packet.context, buffer)
 				new_packet.target_y, _ = cls.STRUCTURE["target_y"].read(packet.context, buffer)
 				new_packet.target_z, _ = cls.STRUCTURE["target_z"].read(packet.context, buffer)
@@ -57,7 +57,7 @@ class UseEntity(SimplePacket.Packet):
 		try:
 			buffer += self.STRUCTURE["target"].write(self.context, self.target)
 			buffer += self.STRUCTURE["type"].write(self.context, self.type)
-			if self.type == UseEntityType:
+			if self.type == UseEntityType.InteractAt:
 				buffer += self.STRUCTURE["target_x"].write(self.context, self.target_x)
 				buffer += self.STRUCTURE["target_y"].write(self.context, self.target_y)
 				buffer += self.STRUCTURE["target_z"].write(self.context, self.target_z)
