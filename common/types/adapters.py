@@ -7,7 +7,7 @@ from common.types.common import Boolean, VarInt
 
 
 class BooleanPrefixedOptional(Type):
-	def __init__(self, type: Type):
+	def __init__(self, type: typing.Type[Type]):
 		self.type = type
 		self.value = None
 

@@ -1,22 +1,20 @@
 import common.types.common
+import common.types.complex
 from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
-class PluginMessage(SimplePacket.Packet):
+class HeldItemChange(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
 	STRUCTURE = {
-		'channel': common.types.common.String,
-		'channel_data': common.types.common.ByteArray,
+		'slot': common.types.common.Short,
 	}
-	# STRUCTURE_REPR_HIDDEN_FIELDS = ["channel_data"]
 
 	def __init__(self, context):
 		super().__init__(context)
-		self.channel = None
-		self.channel_data = None
+		self.slot = None
 
 	@property
 	def ID(self):
-		return 0x17
+		return 0x09

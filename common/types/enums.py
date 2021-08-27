@@ -59,3 +59,41 @@ class CombatEventEvent(Enum):
 	EnterCombat = 0
 	EndCombat = 1
 	EntityDead = 2
+
+class UseEntityType(Enum):
+	Interact = 0
+	Attack = 1
+	InteractAt = 2
+
+class PlayerDiggingStatus(Enum):
+	Started = 0
+	Cancelled = 1
+	Finished = 2
+	DropItemStack = 3
+	DropItem = 4
+	ShootArrow_FinishEating = 5
+
+class EntityActionAction(Enum):
+	StartSneaking = 0
+	StopSneaking = 1
+	LeaveBed = 2
+	StartSprinting = 3
+	StopSprinting = 4
+	JumpWithHorse = 5
+	OpenRiddenHorseInv = 6
+
+class ClientSettingsChatModes(Enum):
+	Enabled = 0
+	CommandOnly = 1
+	Hidden = 2
+
+class ClientStatusActions(Enum):
+	PerformRespawn = 0
+	RequestStats = 1
+	TakingInventoryAchievement = 2
+
+class ResourcePackStatusResult(Enum):
+	SuccessfullyLoaded  = 0
+	Declined = 1
+	FailedDownload = 2
+	Excepted = 3

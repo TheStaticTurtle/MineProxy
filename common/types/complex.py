@@ -6,7 +6,8 @@ import pynbt
 
 from common.types import adapters
 from common.types.common import *
-from common.types.enums import GameStateChangeReason, UpdateEntityAction, ScoreboardPosition, CombatEventEvent
+from common.types.enums import *
+from networking.McPackets.Buffer import Buffer
 
 
 class JSONString(Type):
@@ -76,7 +77,6 @@ class Slot(Type):
 		self.item_id = None
 		self.item_count = None
 		self.nbt = None
-		self.nbt_raw = None
 
 		if context.protocol_version <= 47:
 			self.item_damage = None
@@ -91,7 +91,7 @@ class Slot(Type):
 			return f"<Item present={self.present}>"
 
 	@staticmethod
-	def read(context, file_object):
+	def read(context, file_object: Buffer):
 		q = Slot(context)
 
 		if context.protocol_version <= 47:
@@ -100,14 +100,11 @@ class Slot(Type):
 			if q.present:
 				q.item_count, _ = Byte.read(context, file_object)
 				q.item_damage, _ = Short.read(context, file_object)
-				q.nbt_raw = file_object.read_all()
-				stream = io.BytesIO(q.nbt_raw)
-				if stream.read(1) == b'\x00':
+				if file_object.peek(1) == b'\x00':
+					file_object.read(1)  # Read the byte as it's not an NBT tag
 					q.nbt = None
 				else:
-					stream.seek(0)
-					q.nbt, _ = NBT.read(context, stream)
-
+					q.nbt, _ = NBT.read(context, file_object)
 		return q, 0
 
 	@staticmethod
@@ -213,6 +210,7 @@ class EntityMetadata(Type):
 			out += value.values[index]["type"].write(context, value.values[index]["value"])
 		return out + b"\x7F"
 
+McStateEnum = adapters.EnumGeneric(VarInt, McState)
 
 class Angle(Type):
 	@staticmethod
@@ -252,7 +250,6 @@ class AttributeModifier(Type):
 		out += Double.write(context, value.amount)
 		out += Byte.write(context, value.operation)
 		return out
-
 AttributeModifierArray = adapters.PrefixedArray(VarInt, AttributeModifier)
 
 class Properties(Type):
@@ -278,9 +275,7 @@ class Properties(Type):
 		out += Double.write(context, value.value)
 		out += AttributeModifierArray.write(context, value.modifiers_array)
 		return out
-
 PropertiesArray = adapters.PrefixedArray(Integer, Properties)
-
 
 class ChunkRecord(Type):
 	def __init__(self):
@@ -305,7 +300,6 @@ class ChunkRecord(Type):
 		out += UnsignedByte.write(context, value.y_coordinate)
 		out += VarInt.write(context, value.block_id)
 		return out
-
 ChunkRecordArray = adapters.PrefixedArray(VarInt, ChunkRecord)
 
 class ExplosionRecord(Type):
@@ -331,15 +325,11 @@ class ExplosionRecord(Type):
 		out += UnsignedByte.write(context, value.byte_2)
 		out += UnsignedByte.write(context, value.byte_3)
 		return out
-
 ExplosionRecordArray = adapters.PrefixedArray(VarInt, ExplosionRecord)
 
 GameStateChangeReasonEnum = adapters.EnumGeneric(UnsignedByte, GameStateChangeReason)
-
 SlotShortArray = adapters.PrefixedArray(Short, Slot)
-
 UpdateEntityActionEnum = adapters.EnumGeneric(UnsignedByte, UpdateEntityAction)
-
 
 class OptionalNBT(Type):
 	@staticmethod
@@ -385,4 +375,19 @@ StatisticArray = adapters.PrefixedArray(VarInt, Statistic)
 VarIntStringArray = adapters.PrefixedArray(VarInt, String)
 
 ScoreboardPositionEnum = adapters.EnumGeneric(Byte, ScoreboardPosition)
+
 CombatEventEventEnum = adapters.EnumGeneric(VarInt, CombatEventEvent)
+
+UseEntityTypeEnum = adapters.EnumGeneric(VarInt, UseEntityType)
+
+PlayerDiggingStatusEnum = adapters.EnumGeneric(VarInt, PlayerDiggingStatus)
+
+EntityActionActionEnum = adapters.EnumGeneric(VarInt, EntityActionAction)
+
+OptionalPosition = adapters.BooleanPrefixedOptional(Position)
+
+ClientSettingsChatModesEnum = adapters.EnumGeneric(Byte, ClientSettingsChatModes)
+
+ClientStatusActionsEnums = adapters.EnumGeneric(VarInt, ClientStatusActions)
+
+ResourcePackStatusResultEnum = adapters.EnumGeneric(VarInt, ResourcePackStatusResult)

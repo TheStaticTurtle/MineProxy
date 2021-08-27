@@ -45,23 +45,25 @@ class Packet:
 		return self.raw_id
 
 	@classmethod
+	def from_buffer(cls, context, buffer):
+		new_packet = cls(context)
+		for key in cls.STRUCTURE.keys():
+			try:
+				value, _ = cls.STRUCTURE[key].read(context, buffer)
+				new_packet.__setattr__(key, value)
+			except Exception as e:
+				raise RuntimeError(f"{new_packet.NAME}: Error while reading key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
+
+		new_packet.apply_meta_fields()
+		return new_packet
+
+	@classmethod
 	def from_basic_packet(cls, packet):
 		if isinstance(packet, Packet):
 			buffer = Buffer()
 			buffer.write(packet.raw_data)
 			buffer.reset_cursor()
-
-			new_packet = cls(packet.context)
-			for key in cls.STRUCTURE.keys():
-				try:
-					value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
-					new_packet.__setattr__(key, value)
-				except Exception as e:
-					raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
-
-			new_packet.apply_meta_fields()
-
-			return new_packet
+			return cls.from_buffer(packet.context, buffer)
 
 		else:
 			raise RuntimeError(f"Can't create {type(cls)} from {type(packet)} ")
