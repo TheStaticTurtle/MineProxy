@@ -1,5 +1,6 @@
 import re
 import urllib.parse
+from abc import ABC
 
 import requests
 
@@ -12,7 +13,7 @@ class MicrosoftAuthException(AuthException):
 class XboxException(MicrosoftAuthException):
 	pass
 
-class AuthenticationException(XboxException):
+class AuthenticationException(MicrosoftAuthException):
 	pass
 
 class DoesntOwnGameError(MicrosoftAuthException):
@@ -28,7 +29,7 @@ def merge_dict(*kwarg):
 	return c
 
 
-class MicrosoftAuthenticationToken(SimpleToken):
+class MicrosoftAuthenticationToken(SimpleToken, ABC):
 	USER_AGENT = "XboxReplay; XboxLiveAuth/4.0"
 	LANGUAGE = "en-US"
 	BASE_HEADERS = {
@@ -113,7 +114,7 @@ class MicrosoftAuthenticationToken(SimpleToken):
 		)
 		return {
 			"urlPost": re.search(self.PRE_AUTH_URL_RE, response.content).group(1),
-			"PPFT": re.search(self.PRE_AUTH_PPFT_RE, response.content).groups(1)[0],
+			"PPFT": re.search(self.PRE_AUTH_PPFT_RE, response.content).group(1),
 		}
 
 	def live_auth(self, username, password):

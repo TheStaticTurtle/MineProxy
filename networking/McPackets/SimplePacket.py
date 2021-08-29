@@ -2,14 +2,13 @@ import json
 
 import common.types.common
 import common.types.complex
-from common import types
 from common.context import Context
 from common.types.enums import McState, McPacketType
 from networking.McPackets.Buffer import Buffer
 import logging
 
 
-def create_simple_packet(context: Context, packet_id:int, packet_data: bytes):
+def create_simple_packet(context: Context, packet_id: int, packet_data: bytes):
 	packet = Packet(context)
 	packet.raw_id = packet_id
 	packet.raw_data = packet_data
@@ -107,4 +106,3 @@ class Packet:
 				else:
 					r += f"{key}={self.__getattribute__(key)} "
 		return r[:-1] + ">"
-

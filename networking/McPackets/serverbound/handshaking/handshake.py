@@ -19,7 +19,7 @@ class Handshake(SimplePacket.Packet):
 		self.protocol_version = None
 		self.server_address = None
 		self.server_port = None
-		self._next_state = None
+		self.next_state = None
 
 	@property
 	def ID(self):

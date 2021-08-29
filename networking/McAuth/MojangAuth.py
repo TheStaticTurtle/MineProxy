@@ -1,8 +1,6 @@
-import logging
-
 import requests
 
-from .SimpleToken import SimpleToken, Profile, AuthException
+from .SimpleToken import SimpleToken, AuthException
 
 
 class YggdrasilError(AuthException):

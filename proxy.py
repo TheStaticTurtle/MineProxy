@@ -49,7 +49,7 @@ class MinecraftProxy(threading.Thread):
 			EncryptionInterceptor(self.context, self.server_connection, self.auth_token),
 			LoginStartInterceptor(self.context, self.auth_token.profile),
 		]
-		self.packet_classifier = McPackets.PacketClasifier(
+		self.packet_classifier = McPackets.PacketClassifier(
 			self.context,
 			parse_play_packets=True if config.MINEPROXY_PARSE_PLAY_PACKETS else False
 		)

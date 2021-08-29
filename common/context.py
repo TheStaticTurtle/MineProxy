@@ -1,7 +1,6 @@
 import logging
 
 import common.types.enums
-from common import types
 
 class Context:
 	def __init__(self):

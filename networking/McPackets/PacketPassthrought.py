@@ -2,7 +2,6 @@ import select
 import zlib
 
 import common.types.common
-from common import types
 from common.connection import Connection
 from common.context import Context
 from networking.McPackets import SimplePacket

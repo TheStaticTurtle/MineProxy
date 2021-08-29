@@ -8,20 +8,12 @@ class _SocketEmulation:
         pass
 
     def send(self, value):
-        """
-        Writes the given bytes to the buffer, designed to emulate socket.send
-        :param value: The bytes to write
-        """
-        self.bytes.write(value)
+        self.write(value)
 
     def read(self, length):
         return b""
 
     def recv(self, length):
-        """
-        Writes the given bytes to the buffer, designed to emulate socket.send
-        :param value: The bytes to write
-        """
         return self.read(length)
 
 class Buffer(_SocketEmulation):
@@ -55,17 +47,3 @@ class Buffer(_SocketEmulation):
 
     def get_writable(self):
         return self.bytes.getvalue()
-
-
-class StackBuffer(_SocketEmulation):
-    def __init__(self):
-        _SocketEmulation.__init__(self)
-        self.bytes = b""
-
-    def write(self, value):
-        self.bytes += value
-
-    def read(self, length):
-        r = self.bytes[:length]
-        self.bytes = self.bytes[length:]
-        return r
