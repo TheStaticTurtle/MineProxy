@@ -18,9 +18,15 @@ If you disable play packets you might be able to use this tool for unsupported p
 | MINEPROXY_PROXY_REMOTE_PORT| Port of the real server |  
 | MINEPROXY_PROXY_LISTEN_PORT| Port of the proxy |  
 | MINEPROXY_PARSE_PLAY_PACKETS  | Parse `Play` packets (disabling drastically increase performance) (True/False)|  
+| MINEPROXY_AUTH_USE_MICROSOFT | Try and use microsoft (xbox live) authentication (True/False) **Experimental** |  
 | MINEPROXY_AUTH_MINECRAFT_EMAIL | Email used for authenticating to mojang servers |  
 | MINEPROXY_AUTH_MINECRAFT_PASSWORD| Password used for the authentication |  
 
+## About authentication  
+  
+This tool should work just fine if you minecraft account is a mojang one.<br>
+If your account is a microsoft account you can try to set the `MINEPROXY_AUTH_USE_MICROSOFT` this feature is experimental as it's based on PrismarineJS implementation and more docs
+  
 ## About compression  
   
 This tool fully supports the compression of Minecraft packets, it will automatically adjust it's setting if it receives a `SetCompression` packet (It will proxy this packet back to the client)  

@@ -1,4 +1,4 @@
-from common.authentication import Profile
+from networking.McAuth.SimpleToken import Profile
 from common.context import Context
 from ..serverbound import login
 from ..SimplePacketInterceptor import SimplePacketInterceptor

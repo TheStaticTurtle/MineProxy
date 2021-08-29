@@ -4,10 +4,10 @@ import socket
 import threading
 
 import networking.McPackets as McPackets
-from common.authentication import AuthenticationToken
 from common.connection import Connection
 from common.context import Context
 from common.types.enums import McState
+from networking.McAuth.SimpleToken import SimpleToken
 from networking.McPackets.PacketPassthrought import PacketPassthrough
 from networking.McPackets.interceptors.EncryptionInterceptor import EncryptionInterceptor
 from networking.McPackets.interceptors.HandshakeInterceptor import HandshakeInterceptor
@@ -15,7 +15,7 @@ from networking.McPackets.interceptors.LoginStartInterceptor import LoginStartIn
 
 
 class MinecraftProxy(threading.Thread):
-	def __init__(self, server_infos, client_socket_infos, auth_token: AuthenticationToken):
+	def __init__(self, server_infos, client_socket_infos, auth_token: SimpleToken):
 		threading.Thread.__init__(self)
 		self.log = logging.getLogger("Proxy")
 		self.log.info("Hellow world")
@@ -51,7 +51,7 @@ class MinecraftProxy(threading.Thread):
 		]
 		self.packet_classifier = McPackets.PacketClasifier(
 			self.context,
-			parse_play_packets= True if os.getenv("MINEPROXY_PARSE_PLAY_PACKETS") == "True" else False
+			parse_play_packets=True if os.getenv("MINEPROXY_PARSE_PLAY_PACKETS") == "True" else False
 		)
 
 	def run(self):
@@ -80,7 +80,6 @@ class MinecraftProxy(threading.Thread):
 				self.client_connection.close()
 				self.server_connection.close()
 				return
-
 
 			try:
 				packet = self.client_bound_passthrought.read_one()
@@ -114,10 +113,8 @@ class MinecraftProxy(threading.Thread):
 				return
 
 
-
 class MinecraftProxyManager(threading.Thread):
-	"""docstring for ClassName"""
-	def __init__(self, server_ip, server_port=25565, listen_port=25565, auth_token=None):
+	def __init__(self, server_ip, server_port=25565, listen_port=25565, auth_token: SimpleToken = None):
 		super(MinecraftProxyManager, self).__init__()
 		self.log = logging.getLogger("Proxy/Manager")
 		self.log.info("Hellow world")

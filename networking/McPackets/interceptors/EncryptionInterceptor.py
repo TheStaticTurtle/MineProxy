@@ -1,7 +1,6 @@
 import zlib
 
 import common.types.common
-from common.authentication import AuthenticationToken
 from common import types, encryption as encryption_tools
 from common.connection import Connection
 from common.context import Context
@@ -9,13 +8,14 @@ from ..Buffer import Buffer
 from ..clientbound.login import EncryptionRequest
 from ..serverbound.login import EncryptionResponse
 from ..SimplePacketInterceptor import SimplePacketInterceptor
+from ...McAuth.SimpleToken import SimpleToken
 
 
 class EncryptionInterceptor(SimplePacketInterceptor):
 	NAME = "EncryptionInterceptor"
 	packet_class = EncryptionRequest
 
-	def __init__(self, context: Context, connection: Connection, auth_token: AuthenticationToken):
+	def __init__(self, context: Context, connection: Connection, auth_token: SimpleToken):
 		super().__init__(context)
 		self.connection = connection
 		self.auth_token = auth_token
@@ -30,7 +30,7 @@ class EncryptionInterceptor(SimplePacketInterceptor):
 		if packet.server_id != '-':
 			server_id = encryption_tools.generate_verification_hash(packet.server_id, self.secret, packet.public_key)
 			if self.auth_token is not None:
-				self.auth_token.join(server_id)
+				self.auth_token.join_server(server_id)
 
 		encryption_response = EncryptionResponse(self.context)
 		encryption_response.shared_secret = encrypted_secret
