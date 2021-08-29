@@ -11,21 +11,23 @@ The proxy uses Minecraft protocol [47](https://wiki.vg/index.php?title=Protocol&
 This tool is still in construction things might change. Moreover packets are not all tested (most of them are tho).
 If you disable play packets you might be able to use this tool for unsupported protocol versions
 ## Config  
-  
-| Environment variable | Use |  
-|----------------------|-----|  
-| MINEPROXY_PROXY_REMOTE_IP | IP of the real server |  
-| MINEPROXY_PROXY_REMOTE_PORT| Port of the real server |  
-| MINEPROXY_PROXY_LISTEN_PORT| Port of the proxy |  
-| MINEPROXY_PARSE_PLAY_PACKETS  | Parse `Play` packets (disabling drastically increase performance) (True/False)|  
-| MINEPROXY_AUTH_USE_MICROSOFT | Try and use microsoft (xbox live) authentication (True/False) **Experimental** |  
-| MINEPROXY_AUTH_MINECRAFT_EMAIL | Email used for authenticating to mojang servers |  
-| MINEPROXY_AUTH_MINECRAFT_PASSWORD| Password used for the authentication |  
+
+Config is based on a python file named `config.py`, you can see an example in the `config.example.py` but here are what the values mean:
+
+| Variable                         | Use | Type |
+|----------------------------------|-----|------|
+| MINEPROXY_PROXY_REMOTE_IP        | IP of the real server | String |
+| MINEPROXY_PROXY_REMOTE_PORT      | Port of the real server | Int |
+| MINEPROXY_PROXY_LISTEN_PORT      | Port of the proxy | Int |
+| MINEPROXY_PARSE_PLAY_PACKETS     | Parse `Play` packets (disabling drastically increase performance) | Boolean |
+| MINEPROXY_AUTH_USE_MICROSOFT     | Try and use microsoft (xbox live) authentication **Experimental** | Boolean |  
+| MINEPROXY_AUTH_MINECRAFT_EMAIL   | Email used for authenticating to mojang servers |  String |
+| MINEPROXY_AUTH_MINECRAFT_PASSWORD| Password used for the authentication | String |
 
 ## About authentication  
   
 This tool should work just fine if you minecraft account is a mojang one.<br>
-If your account is a microsoft account you can try to set the `MINEPROXY_AUTH_USE_MICROSOFT` this feature is experimental as it's based on PrismarineJS implementation and more docs
+If your account is a microsoft account you can try to set `MINEPROXY_AUTH_USE_MICROSOFT` to `True` this feature is experimental as it's based on reading PrismarineJS and xbox-live-auth source code and some parts docs
   
 ## About compression  
   

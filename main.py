@@ -1,7 +1,6 @@
-from dotenv import load_dotenv
 import sys
-import os
 import time
+import config
 
 from networking.McAuth.MicrosoftAuth import MicrosoftAuthenticationToken
 from networking.McAuth.MojangAuth import MojangAuthenticationToken
@@ -18,20 +17,18 @@ coloredlogs.install(level='DEBUG', stream=sys.stdout, fmt="[%(asctime)s] [%(name
 log = logging.getLogger("main")
 log.info("Hellow world")
 
-load_dotenv()
 
-
-auth_token = MicrosoftAuthenticationToken() if os.getenv("MINEPROXY_AUTH_USE_MICROSOFT") == "True" else MojangAuthenticationToken()
+auth_token = MicrosoftAuthenticationToken() if config.MINEPROXY_AUTH_USE_MICROSOFT else MojangAuthenticationToken()
 try:
-	auth_token.authenticate(os.getenv("MINEPROXY_AUTH_MINECRAFT_EMAIL"), os.getenv("MINEPROXY_AUTH_MINECRAFT_PASSWORD"))
+	auth_token.authenticate(config.MINEPROXY_AUTH_MINECRAFT_EMAIL, config.MINEPROXY_AUTH_MINECRAFT_PASSWORD)
 except AuthException as e:
-	log.error(f"Error occured while logging in: {e}")
+	log.error(f"Error occurred while logging in: {e}")
 	sys.exit()
 
 proxy = proxy.MinecraftProxyManager(
-	os.getenv("MINEPROXY_PROXY_REMOTE_IP"),
-	server_port=int(os.getenv("MINEPROXY_PROXY_REMOTE_PORT")),
-	listen_port=int(os.getenv("MINEPROXY_PROXY_LISTEN_PORT")),
+	config.MINEPROXY_PROXY_REMOTE_IP,
+	server_port=config.MINEPROXY_PROXY_REMOTE_PORT,
+	listen_port=config.MINEPROXY_PROXY_LISTEN_PORT,
 	auth_token=auth_token
 )
 proxy.start()

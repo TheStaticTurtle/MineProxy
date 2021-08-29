@@ -1,7 +1,7 @@
 import logging
-import os
 import socket
 import threading
+import config
 
 import networking.McPackets as McPackets
 from common.connection import Connection
@@ -51,7 +51,7 @@ class MinecraftProxy(threading.Thread):
 		]
 		self.packet_classifier = McPackets.PacketClasifier(
 			self.context,
-			parse_play_packets=True if os.getenv("MINEPROXY_PARSE_PLAY_PACKETS") == "True" else False
+			parse_play_packets=True if config.MINEPROXY_PARSE_PLAY_PACKETS else False
 		)
 
 	def run(self):
