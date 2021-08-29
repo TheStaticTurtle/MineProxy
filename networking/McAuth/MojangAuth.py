@@ -45,7 +45,7 @@ class MojangAuthenticationToken(SimpleToken):
         }
 
         req = requests.post(self.AUTH_SERVER + "/authenticate", json=payload, headers=self.HEADERS)
-        self._raise_from_request(req)
+        self.raise_from_request(req)
 
         json_resp = req.json()
         self.username = username
@@ -72,7 +72,7 @@ class MojangAuthenticationToken(SimpleToken):
             "clientToken": self.client_token
         }
         req = requests.post(self.AUTH_SERVER + "/refresh", json=payload, headers=self.HEADERS)
-        self._raise_from_request(req)
+        self.raise_from_request(req)
 
         json_resp = req.json()
 
@@ -91,13 +91,13 @@ class MojangAuthenticationToken(SimpleToken):
             raise ValueError("'access_token' not set!")
 
         req = requests.post(self.AUTH_SERVER + "/validate", json={"accessToken": self.mc_access_token}, headers=self.HEADERS)
-        self._raise_from_request(req)
+        self.raise_from_request(req)
 
 
     @classmethod
     def sign_out(cls, username, password):
         req = requests.post(cls.AUTH_SERVER + "/signout", json={"username": username, "password": password}, headers=cls.HEADERS)
-        cls._raise_from_request(req)
+        cls.raise_from_request(req)
 
     def invalidate(self):
         payload = {
@@ -105,7 +105,7 @@ class MojangAuthenticationToken(SimpleToken):
             "clientToken": self.client_token
         }
         req = requests.post(self.AUTH_SERVER + "/invalidate", json=payload, headers=self.HEADERS)
-        self._raise_from_request(req)
+        self.raise_from_request(req)
 
         if not req.raise_for_status() and not req.text:
             return True
@@ -129,10 +129,10 @@ class MojangAuthenticationToken(SimpleToken):
         if not req.raise_for_status():
             return True
         else:
-            self._raise_from_request(req)
+            self.raise_from_request(req)
 
     @classmethod
-    def _raise_from_request(cls, req):
+    def raise_from_request(cls, req):
         if req.status_code == requests.codes['ok']:
             return None
 

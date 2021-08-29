@@ -1,13 +1,10 @@
-import json
-import logging
 import re
 import urllib.parse
-import uuid
 
 import requests
 
 from . import MojangAuth
-from .SimpleToken import SimpleToken, Profile, AuthException, MinecraftError
+from .SimpleToken import SimpleToken, AuthException, MinecraftError
 
 class MicrosoftAuthException(AuthException):
 	pass
@@ -23,7 +20,6 @@ class DoesntOwnGameError(MicrosoftAuthException):
 
 
 
-
 def merge_dict(*kwarg):
 	c = {}
 	for d in kwarg:
@@ -33,18 +29,42 @@ def merge_dict(*kwarg):
 
 
 class MicrosoftAuthenticationToken(SimpleToken):
-	CLIENT_ID = "000000004C12AE6F"
-	SCOPE = "service::user.auth.xboxlive.com::MBI_SSL"
-	RESPONSE_TYPE = "token"
-	REDIRECT_URI = "https://login.live.com/oauth20_desktop.srf"
 	USER_AGENT = "XboxReplay; XboxLiveAuth/4.0"
 	LANGUAGE = "en-US"
-
-	XBLContractVersion = 2
-	XBLAdditionalHeaders = {
-		"Accept": 'application/json',
-		'X-Xbl-Contract-Version': str(XBLContractVersion)
+	BASE_HEADERS = {
+		"Pragma": 'no-cache',
+		"Accept": '*/*',
+		"User-Agent": USER_AGENT,
+		"Cache-Control": 'no-store, must-revalidate, no-cache',
+		"Accept-Encoding": 'gzip, deflate, compress',
+		"Accept-Language": f"{LANGUAGE}, {LANGUAGE.split('-')[0]};q=0.9",
 	}
+	LIVE_OAUTH_AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf"
+	LIVE_CLIENT_ID = "000000004C12AE6F"
+	LIVE_SCOPE = "service::user.auth.xboxlive.com::MBI_SSL"
+	LIVE_RESPONSE_TYPE = "token"
+	LIVE_REDIRECT_URI = "https://login.live.com/oauth20_desktop.srf"
+
+	PRE_AUTH_URL_RE = b'urlPost:\\\'([A-Za-z0-9:\?_\-\.&/=]+)'
+	PRE_AUTH_PPFT_RE = b'sFTTag:\\\'.*value="(.*)"/>'
+
+	XBL_AUTHENTICATE_URL = "https://user.auth.xboxlive.com/user/authenticate"
+	XBL_RELAYING_PARTY = 'http://auth.xboxlive.com'
+
+	MINECRAFT_RELAYING_PARTY = "rp://api.minecraftservices.com/"
+	DEFAULT_XSTS_RLEAYING_PARTY = "http://xboxlive.com"
+	DEFAULT_XSTS_SANDBOX_ID = "RETAIL"
+
+	XSTS_AUTHORIZE_URL = "https://xsts.auth.xboxlive.com/xsts/authorize"
+
+	XBL_CONTRACT_VERSION = 2
+	XBL_HEADERS = {
+		"Accept": 'application/json',
+		'X-Xbl-Contract-Version': str(XBL_CONTRACT_VERSION)
+	}
+
+	MINECRAFT_XBOX_STORE_CHECK_URL = "https://api.minecraftservices.com/entitlements/mcstore"
+	MINECRAFT_XBOX_AUTH_URL = "https://api.minecraftservices.com/authentication/login_with_xbox"
 
 	SESSION_SERVER = "https://sessionserver.mojang.com/session/minecraft"
 	SESSION_HEADERS = {
@@ -54,8 +74,6 @@ class MicrosoftAuthenticationToken(SimpleToken):
 	def __init__(self):
 		super().__init__()
 		self.session = requests.session()
-		self.username = None
-		self.device_token = None
 		self.xbox_token_type = "bearer"
 		self.xbox_access_token = None
 		self.xbox_refresh_token = None
@@ -68,30 +86,24 @@ class MicrosoftAuthenticationToken(SimpleToken):
 
 	@property
 	def authenticated(self):
-		return False
+		if not self.mc_access_token:
+			return False
+		return True
 
 	def _get_base_header(self, additional_headers=None):
 		if additional_headers is None:
 			additional_headers = {}
-		base_headers = {
-			"Pragma": 'no-cache',
-			"Accept": '*/*',
-			"User-Agent": self.USER_AGENT,
-			"Cache-Control": 'no-store, must-revalidate, no-cache',
-			"Accept-Encoding": 'gzip, deflate, compress',
-			"Accept-Language": f"{self.LANGUAGE}, {self.LANGUAGE.split('-')[0]};q=0.9",
-		}
-		return merge_dict(base_headers, additional_headers)
+		return merge_dict(self.BASE_HEADERS, additional_headers)
 
-	@staticmethod
-	def _get_authorize_url(client_id=CLIENT_ID, scope=SCOPE, response_type=RESPONSE_TYPE, redirect_uri=REDIRECT_URI):
+	@classmethod
+	def _get_authorize_url(cls, client_id=LIVE_CLIENT_ID, scope=LIVE_SCOPE, response_type=LIVE_RESPONSE_TYPE, redirect_uri=LIVE_REDIRECT_URI):
 		qs = urllib.parse.unquote(urllib.parse.urlencode({
 			'client_id': client_id,
 			'redirect_uri': redirect_uri,
 			'response_type': response_type,
 			'scope': scope,
 		}))
-		return f"https://login.live.com/oauth20_authorize.srf?{qs}"
+		return f"{cls.LIVE_OAUTH_AUTHORIZE_URL}?{qs}"
 
 	def pre_auth(self):
 		self.log.info("Doing Pre-Live-Auth")
@@ -99,11 +111,9 @@ class MicrosoftAuthenticationToken(SimpleToken):
 			self._get_authorize_url(),
 			headers=self._get_base_header(additional_headers={'Accept-Encoding': 'identity'})
 		)
-		url_re = b'urlPost:\\\'([A-Za-z0-9:\?_\-\.&/=]+)'
-		ppft_re = b'sFTTag:\\\'.*value="(.*)"/>'
 		return {
-			"urlPost": re.search(url_re, response.content).group(1),
-			"PPFT": re.search(ppft_re, response.content).groups(1)[0],
+			"urlPost": re.search(self.PRE_AUTH_URL_RE, response.content).group(1),
+			"PPFT": re.search(self.PRE_AUTH_PPFT_RE, response.content).groups(1)[0],
 		}
 
 	def live_auth(self, username, password):
@@ -113,8 +123,7 @@ class MicrosoftAuthenticationToken(SimpleToken):
 
 		response = self.session.post(
 			pre_auth_response["urlPost"],
-			headers=self._get_base_header(additional_headers={'Accept-Encoding': 'identity',
-			                                                  'Content-Type': 'application/x-www-form-urlencoded'}),
+			headers=self._get_base_header(additional_headers={'Accept-Encoding': 'identity', 'Content-Type': 'application/x-www-form-urlencoded'}),
 			data={
 				"login": username,
 				"loginfmt": username,
@@ -141,16 +150,18 @@ class MicrosoftAuthenticationToken(SimpleToken):
 
 		return out
 
-	def _exchange_rps_ticket_for_user_token(self, rpsTicket: str, preamble: str = "t", additional_headers={}):
+	def _exchange_rps_ticket_for_user_token(self, rpsTicket: str, preamble: str = "t", additional_headers=None):
+		if additional_headers is None:
+			additional_headers = {}
 		self.log.info("Exchanging rps ticket")
 		if not rpsTicket.startswith("d=") or not rpsTicket.startswith("t="):
 			rpsTicket = f"{preamble}=" + rpsTicket
 
 		response = requests.post(
-			"https://user.auth.xboxlive.com/user/authenticate",
-			headers=self._get_base_header(additional_headers=merge_dict(additional_headers, self.XBLAdditionalHeaders)),
+			self.XBL_AUTHENTICATE_URL,
+			headers=self._get_base_header(additional_headers=merge_dict(additional_headers, self.XBL_HEADERS)),
 			json={
-				"RelyingParty": 'http://auth.xboxlive.com',
+				"RelyingParty": self.XBL_RELAYING_PARTY,
 				"TokenType": 'JWT',
 				"Properties": {
 					"AuthMethod": 'RPS',
@@ -162,13 +173,13 @@ class MicrosoftAuthenticationToken(SimpleToken):
 
 		return response.json()
 
-	def _exchange_tokens_for_XSTS_token(self, tokens, XSTS_relying_party=None, sandbox_id="RETAIL", additional_headers={}):
+	def _exchange_tokens_for_XSTS_token(self, tokens, XSTS_relying_party=DEFAULT_XSTS_RLEAYING_PARTY, sandbox_id=DEFAULT_XSTS_SANDBOX_ID, additional_headers=None):
+		if additional_headers is None:
+			additional_headers = {}
 		self.log.info("Exchanging tokens for XSTS token")
-		if XSTS_relying_party is None:
-			XSTS_relying_party = "http://xboxlive.com"
 		response = requests.post(
-			"https://xsts.auth.xboxlive.com/xsts/authorize",
-			headers=self._get_base_header(additional_headers=merge_dict(additional_headers, self.XBLAdditionalHeaders)),
+			self.XSTS_AUTHORIZE_URL,
+			headers=self._get_base_header(additional_headers=merge_dict(additional_headers, self.XBL_HEADERS)),
 			json={
 				"RelyingParty": XSTS_relying_party,
 				"TokenType": 'JWT',
@@ -195,7 +206,7 @@ class MicrosoftAuthenticationToken(SimpleToken):
 		response = self._exchange_tokens_for_XSTS_token({
 				"userTokens": [user_token_response["Token"]],
 			},
-			XSTS_relying_party="rp://api.minecraftservices.com/"
+			XSTS_relying_party=self.MINECRAFT_RELAYING_PARTY
 		)
 
 		return {
@@ -206,7 +217,7 @@ class MicrosoftAuthenticationToken(SimpleToken):
 	def authenticate_mc(self, user_hash, xsts_token):
 		self.log.info("Doing minecraft authentication")
 		response = requests.post(
-			"https://api.minecraftservices.com/authentication/login_with_xbox",
+			self.MINECRAFT_XBOX_AUTH_URL,
 			json={
 				"identityToken": f"XBL3.0 x={user_hash};{xsts_token}>",
 			}
@@ -214,12 +225,7 @@ class MicrosoftAuthenticationToken(SimpleToken):
 		return response.json()
 
 	def _raise_if_doesnt_own_game(self):
-		url = "https://api.minecraftservices.com/entitlements/mcstore"
-		response = requests.get(url,
-			headers={
-				"Authorization": f"{self.mc_token_type} {self.mc_access_token}"
-			}
-		)
+		response = requests.get(self.MINECRAFT_XBOX_STORE_CHECK_URL, headers={"Authorization": f"{self.mc_token_type} {self.mc_access_token}"})
 		if len(response.json()["items"]) == 0:
 			raise DoesntOwnGameError("User doesn't own Minecraft")
 
@@ -246,7 +252,6 @@ class MicrosoftAuthenticationToken(SimpleToken):
 
 		self.get_profile()
 
-
 	def join_server(self, server_id):
 		if not self.authenticated:
 			raise MinecraftError("AuthenticationToken hasn't been authenticated yet!")
@@ -263,4 +268,4 @@ class MicrosoftAuthenticationToken(SimpleToken):
 		if not req.raise_for_status():
 			return True
 		else:
-			MojangAuth.MojangAuthenticationToken._raise_from_request(req)
+			MojangAuth.MojangAuthenticationToken.raise_from_request(req)
