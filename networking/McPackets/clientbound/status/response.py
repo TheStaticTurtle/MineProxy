@@ -6,7 +6,10 @@ from common import types
 class Response(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Status
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'response': common.types.complex.JSONString,
 	}
 

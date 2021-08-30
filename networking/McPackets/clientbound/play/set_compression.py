@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class SetCompression(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'threshold': common.types.common.VarInt,
 	}
 

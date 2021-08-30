@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class UpdateSign(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'location': common.types.complex.Position,
 		'line1': common.types.common.String,
 		'line2': common.types.common.String,

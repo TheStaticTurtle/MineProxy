@@ -6,9 +6,12 @@ from common import types
 class Player(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'on_ground': common.types.common.Boolean,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'on_ground': common.types.common.Boolean,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -16,4 +19,8 @@ class Player(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x03
+		if self.context.protocol_version >= 107:
+			return 0x0F
+		if self.context.protocol_version == 47:
+			return 0x03
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

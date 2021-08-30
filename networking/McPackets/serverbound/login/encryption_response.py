@@ -6,7 +6,10 @@ from common import types
 class EncryptionResponse(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'shared_secret': common.types.common.VarIntPrefixedByteArray,
 		'verify_secret': common.types.common.VarIntPrefixedByteArray,
 	}

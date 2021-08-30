@@ -7,7 +7,10 @@ from common import types
 class EntityEquipment(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
 		'slot': common.types.common.Short,
 		'item': common.types.complex.Slot,

@@ -94,7 +94,18 @@ class Slot(Type):
 	def read(context, file_object: Buffer):
 		q = Slot(context)
 
-		if context.protocol_version <= 47:
+		# if context.protocol_version >= XXXXXXXXXXXXX:
+		# 	q.present, _ = Boolean.read(context, file_object)
+		# 	if q.present:
+		# 		q.item_id, _ = VarInt.read(context, file_object)
+		# 		q.item_count, _ = Byte.read(context, file_object)
+		# 		if file_object.peek(1) == b'\x00':
+		# 			file_object.read(1)  # Read the byte as it's not an NBT tag
+		# 			q.nbt = None
+		# 		else:
+		# 			q.nbt, _ = NBT.read(context, file_object)
+
+		if context.protocol_version <= 107:
 			q.item_id, _ = Short.read(context, file_object)
 			q.present = q.item_id != -1
 			if q.present:
@@ -109,7 +120,17 @@ class Slot(Type):
 
 	@staticmethod
 	def write(context, value):
-		if context.protocol_version <= 47:
+		# if context.protocol_version >= XXXXXXXXXXX:
+		# 	out = Boolean.write(context, value.present)
+		# 	if value.present:
+		# 		out += VarInt.write(context, value.item_id)
+		# 		out += Byte.write(context, value.item_count)
+		# 		if value.nbt is None:
+		# 			out += b"\x00"
+		# 		else:
+		# 			out += NBT.write(context, value.nbt)
+
+		if context.protocol_version <= 107:
 			out = Short.write(context, value.item_id)
 			if value.present:
 				out += Byte.write(context, value.item_count)
@@ -183,32 +204,73 @@ class EntityMetadata(Type):
 			6: Int3Position,
 			7: Float3Rotation,
 		}
+		if context.protocol_version >= 107:
+			TYPES = {
+				0: Byte,
+				1: VarInt,
+				2: Float,
+				3: String,
+				4: JSONString,
+				5: Slot,
+				6: Boolean,
+				7: Float3Rotation,
+				8: Position,
+				9: OptionalPosition,
+				10: VarInt,
+				11: OptionalUUID,
+				12: VarInt
+			}
 
 		m = EntityMetadata()
 		try:
-			while True:
-				item, _ = UnsignedByte.read(context, file_object)
-				if item == 0x7F:
-					break
-				index = item & 0x1F
-				type = TYPES[item >> 5]
+			if context.protocol_version >= 107:
+				while True:
+					index, _ = UnsignedByte.read(context, file_object)
+					if index == 0xFF:
+						break
+					type_i, _ = Byte.read(context, file_object)
+					type = TYPES[type_i]
 
-				m.values[index] = {
-					"item": item,
-					"type": type,
-					"value": type.read(context, file_object)[0]
-				}
+					m.values[index] = {
+						"index": index,
+						"type": type,
+						"type_i": type_i,
+						"value": type.read(context, file_object)[0]
+					}
+
+			if context.protocol_version == 47:
+				while True:
+					item, _ = UnsignedByte.read(context, file_object)
+					if item == 0x7F:
+						break
+					index = item & 0x1F
+					type = TYPES[item >> 5]
+
+					m.values[index] = {
+						"item": item,
+						"type": type,
+						"value": type.read(context, file_object)[0]
+					}
 		except Exception as e:
 			logging.getLogger("EntityMetadataType").warning(f"Error, {e} (Packet might not have been terminated correctly)")
 		return m, 0
 
 	@staticmethod
 	def write(context, value):
-		out = b""
-		for index in value.values.keys():
-			out += UnsignedByte.write(context, value.values[index]["item"])
-			out += value.values[index]["type"].write(context, value.values[index]["value"])
-		return out + b"\x7F"
+		if context.protocol_version >= 107:
+			out = b""
+			for index in value.values.keys():
+				out += UnsignedByte.write(context, value.values[index]["index"])
+				out += Byte.write(context, value.values[index]["type_i"])
+				out += value.values[index]["type"].write(context, value.values[index]["value"])
+			return out + b"\xFF"
+
+		if context.protocol_version == 47:
+			out = b""
+			for index in value.values.keys():
+				out += UnsignedByte.write(context, value.values[index]["item"])
+				out += value.values[index]["type"].write(context, value.values[index]["value"])
+			return out + b"\x7F"
 
 McStateEnum = adapters.EnumGeneric(VarInt, McState)
 
@@ -222,7 +284,8 @@ class Angle(Type):
 	def write(context, value):
 		return UnsignedByte.write(context, round(256 * ((value % 360) / 360)))
 
-FixedPointInteger = adapters.FixedPoint(Integer)
+FixedPointInteger3B = adapters.FixedPoint(Integer, fractional_bits=3)
+FixedPointInteger5B = adapters.FixedPoint(Integer, fractional_bits=5)
 FixedPointByte = adapters.FixedPoint(Byte)
 
 VelocityShort = adapters.Velocity(Short)
@@ -383,6 +446,7 @@ UseEntityTypeEnum = adapters.EnumGeneric(VarInt, UseEntityType)
 PlayerDiggingStatusEnum = adapters.EnumGeneric(VarInt, PlayerDiggingStatus)
 
 EntityActionActionEnum = adapters.EnumGeneric(VarInt, EntityActionAction)
+EntityActionActionV107Enum = adapters.EnumGeneric(VarInt, EntityActionActionV107)
 
 OptionalPosition = adapters.BooleanPrefixedOptional(Position)
 
@@ -393,3 +457,11 @@ ClientStatusActionsEnums = adapters.EnumGeneric(VarInt, ClientStatusActions)
 ResourcePackStatusResultEnum = adapters.EnumGeneric(VarInt, ResourcePackStatusResult)
 
 AnimationAnimationEnum = adapters.EnumGeneric(UnsignedByte, Animation)
+
+ClientSettingsMainHandEnum = adapters.EnumGeneric(VarInt, ClientSettingsMainHand)
+
+UseEntityHandEnum = adapters.EnumGeneric(VarInt, UseEntityHand)
+
+OptionalUUID = adapters.BooleanPrefixedOptional(UUID)
+
+SoundCategoryEnum = adapters.EnumGeneric(VarInt, SoundCategory)

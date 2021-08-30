@@ -6,22 +6,25 @@ from networking.McPackets.Buffer import Buffer
 from networking.McPackets.SimplePacket import Packet
 
 
-class SpawnObject(SimplePacket.Packet):
+class SpawnObjectV47(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'type': common.types.common.Byte,
-		'x': common.types.complex.FixedPointInteger,
-		'y': common.types.complex.FixedPointInteger,
-		'z': common.types.complex.FixedPointInteger,
-		'pitch': common.types.complex.Angle,
-		'yaw': common.types.complex.Angle,
-		'data': common.types.common.Integer,
-		'velocity_x': common.types.complex.VelocityShort,
-		'velocity_y': common.types.complex.VelocityShort,
-		'velocity_z': common.types.complex.VelocityShort,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'type': common.types.common.Byte,
+			'x': common.types.complex.FixedPointInteger5B,
+			'y': common.types.complex.FixedPointInteger5B,
+			'z': common.types.complex.FixedPointInteger5B,
+			'pitch': common.types.complex.Angle,
+			'yaw': common.types.complex.Angle,
+			'data': common.types.common.Integer,
+			'velocity_x': common.types.complex.VelocityShort,
+			'velocity_y': common.types.complex.VelocityShort,
+			'velocity_z': common.types.complex.VelocityShort,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -39,7 +42,9 @@ class SpawnObject(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x0E
+		if self.context.protocol_version == 47:
+			return 0x0E
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	@classmethod
 	def from_basic_packet(cls, packet):
@@ -50,19 +55,19 @@ class SpawnObject(SimplePacket.Packet):
 
 			new_packet = cls(packet.context)
 
-			new_packet.entity_id, _ = cls.STRUCTURE["entity_id"].read(packet.context, buffer)
-			new_packet.type, _ = cls.STRUCTURE["type"].read(packet.context, buffer)
-			new_packet.x, _ = cls.STRUCTURE["x"].read(packet.context, buffer)
-			new_packet.y, _ = cls.STRUCTURE["y"].read(packet.context, buffer)
-			new_packet.z, _ = cls.STRUCTURE["z"].read(packet.context, buffer)
-			new_packet.pitch, _ = cls.STRUCTURE["pitch"].read(packet.context, buffer)
-			new_packet.yaw, _ = cls.STRUCTURE["yaw"].read(packet.context, buffer)
-			new_packet.data, _ = cls.STRUCTURE["data"].read(packet.context, buffer)
+			new_packet.entity_id, _ = new_packet.STRUCTURE["entity_id"].read(packet.context, buffer)
+			new_packet.type, _ = new_packet.STRUCTURE["type"].read(packet.context, buffer)
+			new_packet.x, _ = new_packet.STRUCTURE["x"].read(packet.context, buffer)
+			new_packet.y, _ = new_packet.STRUCTURE["y"].read(packet.context, buffer)
+			new_packet.z, _ = new_packet.STRUCTURE["z"].read(packet.context, buffer)
+			new_packet.pitch, _ = new_packet.STRUCTURE["pitch"].read(packet.context, buffer)
+			new_packet.yaw, _ = new_packet.STRUCTURE["yaw"].read(packet.context, buffer)
+			new_packet.data, _ = new_packet.STRUCTURE["data"].read(packet.context, buffer)
 
 			if new_packet.data != 0:
-				new_packet.velocity_x, _ = cls.STRUCTURE["velocity_x"].read(packet.context, buffer)
-				new_packet.velocity_y, _ = cls.STRUCTURE["velocity_y"].read(packet.context, buffer)
-				new_packet.velocity_z, _ = cls.STRUCTURE["velocity_z"].read(packet.context, buffer)
+				new_packet.velocity_x, _ = new_packet.STRUCTURE["velocity_x"].read(packet.context, buffer)
+				new_packet.velocity_y, _ = new_packet.STRUCTURE["velocity_y"].read(packet.context, buffer)
+				new_packet.velocity_z, _ = new_packet.STRUCTURE["velocity_z"].read(packet.context, buffer)
 
 			new_packet.apply_meta_fields()
 
@@ -94,6 +99,47 @@ class SpawnObject(SimplePacket.Packet):
 					buffer += self.STRUCTURE["velocity_y"].write(self.context, self.velocity_y)
 					buffer += self.STRUCTURE["velocity_z"].write(self.context, self.velocity_z)
 			except Exception as e:
-				raise RuntimeError(f"{self.NAME}: Error while writing key {key} for type {self.STRUCTURE[key].__class__.__name__}: {str(e)}")
+				raise RuntimeError(f"{self.NAME}: Error while writing key: {str(e)}")
 
 			return common.types.common.VarInt.write(self.context, self.ID) + buffer
+
+
+class SpawnObjectV107(SimplePacket.Packet):
+	TYPE = McPacketType.Clientbound
+	SUBTYPE = McState.Play
+
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'object_uuid': common.types.common.UUID,
+			'type': common.types.common.Byte,
+			'x': common.types.complex.Double,
+			'y': common.types.complex.Double,
+			'z': common.types.complex.Double,
+			'pitch': common.types.complex.Angle,
+			'yaw': common.types.complex.Angle,
+			'data': common.types.common.Integer,
+			'velocity_x': common.types.complex.VelocityShort,
+			'velocity_y': common.types.complex.VelocityShort,
+			'velocity_z': common.types.complex.VelocityShort,
+		}
+
+	def __init__(self, context):
+		super().__init__(context)
+		self.entity_id = None
+		self.object_uuid = None
+		self.type = None
+		self.x = None
+		self.y = None
+		self.z = None
+		self.pitch = None
+		self.yaw = None
+		self.data = None
+		self.velocity_x = None
+		self.velocity_y = None
+		self.velocity_z = None
+
+	@property
+	def ID(self):
+		return 0x00

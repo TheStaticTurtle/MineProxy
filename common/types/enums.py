@@ -8,7 +8,6 @@ class McState(Enum):
 	Play = 3
 	Unknown = 4
 
-
 class McPacketType(Enum):
 	Clientbound = 0
 	ServerBound = 1
@@ -72,6 +71,7 @@ class PlayerDiggingStatus(Enum):
 	DropItemStack = 3
 	DropItem = 4
 	ShootArrow_FinishEating = 5
+	SwapItemInHand = 6
 
 class EntityActionAction(Enum):
 	StartSneaking = 0
@@ -81,11 +81,25 @@ class EntityActionAction(Enum):
 	StopSprinting = 4
 	JumpWithHorse = 5
 	OpenRiddenHorseInv = 6
+class EntityActionActionV107(Enum):
+	StartSneaking = 0
+	StopSneaking = 1
+	LeaveBed = 2
+	StartSprinting = 3
+	StopSprinting = 4
+	StartJumpWithHorse = 5
+	SttopJumpWithHorse = 6
+	OpenRiddenHorseInv = 7
+	StartFlyingElytra = 8
 
 class ClientSettingsChatModes(Enum):
 	Enabled = 0
 	CommandOnly = 1
 	Hidden = 2
+
+class ClientSettingsMainHand(Enum):
+	Left = 0
+	Right = 1
 
 class ClientStatusActions(Enum):
 	PerformRespawn = 0
@@ -97,3 +111,19 @@ class ResourcePackStatusResult(Enum):
 	Declined = 1
 	FailedDownload = 2
 	Excepted = 3
+
+class UseEntityHand(Enum):
+	MainHand = 0
+	OffHand = 1
+
+class SoundCategory(Enum):
+	MASTER = 1
+	MUSIC = 2
+	RECORDS = 3
+	WEATHER = 4
+	BLOCKS = 5
+	HOSTILE = 6
+	NEUTRAL = 7
+	PLAYERS = 8
+	AMBIENT = 9
+	VOICE = 10

@@ -6,7 +6,10 @@ from networking.McPackets import SimplePacket
 class EntityEffect(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
 		'effect_id': common.types.common.Byte,
 		'amplifier': common.types.common.Byte,

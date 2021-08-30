@@ -6,7 +6,10 @@ from networking.McPackets import SimplePacket
 class AttachEntity(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.Integer,
 		'vehicle_id': common.types.common.Integer,
 		'leash': common.types.common.Boolean,

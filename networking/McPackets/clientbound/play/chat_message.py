@@ -7,10 +7,13 @@ from common import types
 class ChatMessage(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'data': common.types.complex.JSONString,
-		'position': common.types.common.Byte,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'data': common.types.complex.JSONString,
+			'position': common.types.common.Byte,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -19,4 +22,8 @@ class ChatMessage(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x02
+		if self.context.protocol_version >= 107:
+			return 0x0F
+		if self.context.protocol_version == 47:
+			return 0x02
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

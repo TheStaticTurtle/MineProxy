@@ -6,7 +6,10 @@ from networking.McPackets import SimplePacket
 class CollectItem(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'collected_entity_id': common.types.common.VarInt,
 		'collector_location': common.types.common.VarInt,
 	}

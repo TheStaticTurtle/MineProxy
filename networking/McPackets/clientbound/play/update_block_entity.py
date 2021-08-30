@@ -8,11 +8,14 @@ from networking.McPackets.Buffer import Buffer
 class UpdateBlockEntity(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'location': common.types.complex.Position,
-		'action': common.types.complex.UpdateEntityActionEnum,
-		'nbt_data': common.types.complex.OptionalNBT,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'location': common.types.complex.Position,
+			'action': common.types.complex.UpdateEntityActionEnum,
+			'nbt_data': common.types.complex.OptionalNBT,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -22,4 +25,8 @@ class UpdateBlockEntity(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x35
+		if self.context.protocol_version >= 107:
+			return 0x09
+		if self.context.protocol_version == 47:
+			return 0x35
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

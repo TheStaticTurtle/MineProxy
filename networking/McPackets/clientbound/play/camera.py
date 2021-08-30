@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class Camera(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'camera_id': common.types.common.VarInt,
 	}
 

@@ -7,7 +7,10 @@ from common import types
 class ConfirmTransaction(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'window_id': common.types.common.UnsignedByte,
 		'action_number': common.types.common.Short,
 		'accepted': common.types.common.Boolean,
@@ -21,4 +24,8 @@ class ConfirmTransaction(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x0F
+		if self.context.protocol_version >= 107:
+			return 0x05
+		if self.context.protocol_version == 47:
+			return 0x1F
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

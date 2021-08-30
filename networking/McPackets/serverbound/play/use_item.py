@@ -1,28 +1,24 @@
-import common.types.common
+import common.types.complex
 from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 from common import types
 
-class PluginMessage(SimplePacket.Packet):
-	TYPE = McPacketType.Clientbound
+class UseItem(SimplePacket.Packet):
+	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-
+	
 	@property
 	def STRUCTURE(self):
 		return {
-			'channel': common.types.common.String,
-			'data': common.types.common.ByteArray
+			'hand': common.types.complex.UseEntityHandEnum,
 		}
 
 	def __init__(self, context):
 		super().__init__(context)
-		self.channel = None
-		self.data = None
+		self.hand = None
 
 	@property
 	def ID(self):
 		if self.context.protocol_version >= 107:
-			return 0x18
-		if self.context.protocol_version == 47:
-			return 0x3F
+			return 0x1D
 		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

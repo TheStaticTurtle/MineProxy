@@ -6,7 +6,10 @@ from common import types
 class EncryptionRequest(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'server_id': common.types.common.String,
 		'public_key': common.types.common.VarIntPrefixedByteArray,
 		'verify_secret': common.types.common.VarIntPrefixedByteArray,

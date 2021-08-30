@@ -6,7 +6,10 @@ from common import types
 class Ping(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Status
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'payload': common.types.common.Long,
 	}
 

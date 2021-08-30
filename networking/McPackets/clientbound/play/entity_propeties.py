@@ -6,7 +6,10 @@ from networking.McPackets import SimplePacket
 class EntityProperties(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
 		'properties': common.types.complex.PropertiesArray,
 	}

@@ -6,7 +6,10 @@ from common import types
 class Success(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'uuid': common.types.common.String,
 		'username': common.types.common.String,
 	}

@@ -7,7 +7,10 @@ from common import types
 class ClientStatus(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'action': common.types.complex.ClientStatusActionsEnums
 	}
 
@@ -17,4 +20,8 @@ class ClientStatus(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x16
+		if self.context.protocol_version >= 107:
+			return 0x03
+		if self.context.protocol_version == 47:
+			return 0x16
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

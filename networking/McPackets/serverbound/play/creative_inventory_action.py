@@ -7,10 +7,13 @@ from common import types
 class CreativeInventorAction(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'slot': common.types.common.Short,
-		'clicked_item': common.types.complex.Slot,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'slot': common.types.common.Short,
+			'clicked_item': common.types.complex.Slot,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -19,4 +22,8 @@ class CreativeInventorAction(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x10
+		if self.context.protocol_version >= 107:
+			return 0x18
+		if self.context.protocol_version == 47:
+			return 0x10
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

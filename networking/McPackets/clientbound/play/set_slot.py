@@ -8,11 +8,14 @@ from networking.McPackets.Buffer import Buffer
 class SetSlot(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'window_id': common.types.common.UnsignedByte,
-		'slot': common.types.common.Short,
-		'slot_data': common.types.complex.Slot,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'window_id': common.types.common.Byte if self.context.protocol_version >= 107 else common.types.common.UnsignedByte,
+			'slot': common.types.common.Short,
+			'slot_data': common.types.complex.Slot,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -22,4 +25,8 @@ class SetSlot(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x2F
+		if self.context.protocol_version >= 107:
+			return 0x16
+		if self.context.protocol_version == 47:
+			return 0x2F
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

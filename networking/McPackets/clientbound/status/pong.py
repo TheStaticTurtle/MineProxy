@@ -6,7 +6,10 @@ from common import types
 class Pong(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Status
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'payload': common.types.common.Long,
 	}
 

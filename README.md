@@ -45,7 +45,8 @@ Generating a `EncryptionRequest` packet and login into online server does mean t
 All the basics allowing for packet decoding / encoding / compression and network encryption are implemented. Here is what is implemented  
 | Minecraft Version | Protocol Version | Coverage |  
 |-------------------|------------------|----------|  
-| 1.8 - 1.8.9       | [47](https://wiki.vg/index.php?title=Protocol&oldid=7368)               | Non-Play packets: 12/12<br>Serverbound packets: 32/32<br>Clientbound packets: 75/80<br>Missing packets:<br>- `MapChunkBulk`<br>- `Map`<br>- `PlayerListItem`<br>- `WorldBorder`<br>- `Title` |  
+| 1.9               | [107](https://wiki.vg/index.php?title=Protocol&oldid=7617)              | Non-Play packets: All<br>Serverbound packets: All<br>Clientbound packets: None<br> |  
+| 1.8 - 1.8.9       | [47](https://wiki.vg/index.php?title=Protocol&oldid=7368)               | Non-Play packets: All<br>Serverbound packets: All<br>Clientbound packets: 75/80<br>Missing packets:<br>- `MapChunkBulk`<br>- `Map`<br>- `PlayerListItem`<br>- `WorldBorder`<br>- `Title` |  
   
 ### Protocols migration ?  
 The base is V47 but let's imagine we want to support packets from protocol V109, instead of rewriting the entire packet table for the V109 we can just ignore packets like Handshake and don't add them in the V109 table. Instead, the script will find the closest version, in this case it's the V47 one  

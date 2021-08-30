@@ -8,9 +8,12 @@ from networking.McPackets.Buffer import Buffer
 class Statistics(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'statistics': common.types.complex.StatisticArray,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'statistics': common.types.complex.StatisticArray,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -18,4 +21,8 @@ class Statistics(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x37
+		if self.context.protocol_version >= 107:
+			return 0x07
+		if self.context.protocol_version == 47:
+			return 0x37
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

@@ -6,7 +6,10 @@ from common import types
 class LegacySeverPing(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Handshaking
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'payload': common.types.common.Long,
 	}
 

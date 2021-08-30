@@ -7,9 +7,12 @@ from common import types
 class CloseWindow(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'window_id': common.types.common.UnsignedByte,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'window_id': common.types.common.UnsignedByte,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -17,4 +20,8 @@ class CloseWindow(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x0D
+		if self.context.protocol_version >= 107:
+			return 0x08
+		if self.context.protocol_version == 47:
+			return 0x0D
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

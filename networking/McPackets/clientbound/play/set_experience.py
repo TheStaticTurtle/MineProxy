@@ -6,7 +6,10 @@ from networking.McPackets import SimplePacket
 class SetExperience(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'experience_bar': common.types.common.Float,
 		'level': common.types.common.VarInt,
 		'total_experience': common.types.common.VarInt,

@@ -9,9 +9,12 @@ from networking.McPackets.SimplePacket import Packet
 class DestroyEntities(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'count': common.types.common.VarInt,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'count': common.types.common.VarInt,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -20,7 +23,11 @@ class DestroyEntities(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x13
+		if self.context.protocol_version >= 107:
+			return 0x30
+		if self.context.protocol_version == 47:
+			return 0x13
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	@classmethod
 	def from_basic_packet(cls, packet):
@@ -31,7 +38,7 @@ class DestroyEntities(SimplePacket.Packet):
 
 			new_packet = cls(packet.context)
 
-			new_packet.count, _ = cls.STRUCTURE["count"].read(packet.context, buffer)
+			new_packet.count, _ = new_packet.STRUCTURE["count"].read(packet.context, buffer)
 			for i in range(new_packet.count):
 				new_packet.entity_ids.append(common.types.common.VarInt.read(packet.context, buffer)[0])
 

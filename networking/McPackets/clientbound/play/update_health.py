@@ -6,7 +6,10 @@ from common import types
 class UpdateHealth(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'health': common.types.common.Float,
 		'food': common.types.common.VarInt,
 		'food_saturation': common.types.common.Float,

@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class UpdateEntityNBT(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
 		'tag': common.types.complex.NBT,
 	}

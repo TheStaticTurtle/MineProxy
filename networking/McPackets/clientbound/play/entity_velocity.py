@@ -9,7 +9,10 @@ from networking.McPackets.SimplePacket import Packet
 class EntityVelocity(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
 		'velocity_x': common.types.complex.VelocityShort,
 		'velocity_y': common.types.complex.VelocityShort,

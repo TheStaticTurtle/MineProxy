@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class RessourcePackSend(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'url': common.types.common.String,
 		'sha1_hash': common.types.common.String,
 	}
@@ -20,4 +23,8 @@ class RessourcePackSend(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x48
+		if self.context.protocol_version >= 107:
+			return 0x32
+		if self.context.protocol_version == 47:
+			return 0x48
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

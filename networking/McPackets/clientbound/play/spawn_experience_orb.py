@@ -9,13 +9,16 @@ from networking.McPackets.SimplePacket import Packet
 class SpawnExperienceOrb(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'x': common.types.complex.FixedPointInteger,
-		'y': common.types.complex.FixedPointInteger,
-		'z': common.types.complex.FixedPointInteger,
-		'count': common.types.common.Short,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'x': common.types.complex.Double if self.context.protocol_version >= 107 else common.types.complex.FixedPointInteger5B,
+			'y': common.types.complex.Double if self.context.protocol_version >= 107 else common.types.complex.FixedPointInteger5B,
+			'z': common.types.complex.Double if self.context.protocol_version >= 107 else common.types.complex.FixedPointInteger5B,
+			'count': common.types.common.Short,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -27,4 +30,8 @@ class SpawnExperienceOrb(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x11
+		if self.context.protocol_version >= 107:
+			return 0x01
+		if self.context.protocol_version == 47:
+			return 0x11
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

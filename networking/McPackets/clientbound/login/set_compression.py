@@ -6,7 +6,10 @@ from common import types
 class SetCompression(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'threshold': common.types.common.VarInt,
 	}
 

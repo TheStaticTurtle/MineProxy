@@ -1,7 +1,8 @@
 import logging
 from common.context import Context
 from common.types.enums import McState
-from networking.McPackets.protocol_migrations import proto47
+from networking.McPackets.protocol_migrations import proto47, proto107
+
 
 def merge_dicts_rec(*kwarg):
 	out = {}
@@ -19,11 +20,14 @@ def merge_dicts_rec(*kwarg):
 class LutManager:
 	def __init__(self):
 		self.log = logging.getLogger("LutManager")
-		self.lut_versions = [47]
+		# self.lut_versions = [107]
+		self.lut_versions = [47, 107]
 		self.luts_serverbound = {
+			107: proto107.lut_serverbound,
 			47: proto47.lut_serverbound,
 		}
 		self.luts_clientbound = {
+			107: proto107.lut_clientbound,
 			47: proto47.lut_clientbound,
 		}
 
@@ -76,7 +80,10 @@ class Classifier:
 			if packet.ID in self.lut_clientbound[self.context.current_state].keys():
 				P = self.lut_clientbound[self.context.current_state][packet.ID]
 				if P:
-					return P.from_basic_packet(packet), True
+					new_packet = P.from_basic_packet(packet)
+					if new_packet.ID != packet.ID:
+						raise RuntimeError(f"Classifier classified id 0x{packet.ID:02x} to: {new_packet.__class__.__name__} but {new_packet.__class__.__name__} reported id is 0x{new_packet.ID:02x}")
+					return new_packet, True
 		return packet, False
 
 	def classify_serverbound(self, packet):
@@ -86,5 +93,8 @@ class Classifier:
 			if packet.ID in self.lut_serverbound[self.context.current_state].keys():
 				P = self.lut_serverbound[self.context.current_state][packet.ID]
 				if P:
-					return P.from_basic_packet(packet), True
+					new_packet = P.from_basic_packet(packet)
+					if new_packet.ID != packet.ID:
+						raise RuntimeError(f"Classifier classified id 0x{packet.ID:02x} to: {new_packet.__class__.__name__} but {new_packet.__class__.__name__} reported id is 0x{new_packet.ID:02x}")
+					return new_packet, True
 		return packet, False

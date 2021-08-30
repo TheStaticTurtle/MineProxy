@@ -7,11 +7,14 @@ from common import types
 class SteerVehicle(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'sideways': common.types.common.Float,
-		'forward': common.types.common.Float,
-		'flags': common.types.common.UnsignedByte,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'sideways': common.types.common.Float,
+			'forward': common.types.common.Float,
+			'flags': common.types.common.UnsignedByte,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -21,4 +24,8 @@ class SteerVehicle(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x0C
+		if self.context.protocol_version >= 107:
+			return 0x15
+		if self.context.protocol_version == 47:
+			return 0x0C
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

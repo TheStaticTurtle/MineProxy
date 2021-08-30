@@ -6,11 +6,14 @@ from networking.McPackets import SimplePacket
 class EntityTeleport(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'entity_id': common.types.common.VarInt,
-		'x': common.types.complex.FixedPointInteger,
-		'y': common.types.complex.FixedPointInteger,
-		'z': common.types.complex.FixedPointInteger,
+		'x': common.types.complex.FixedPointInteger5B,
+		'y': common.types.complex.FixedPointInteger5B,
+		'z': common.types.complex.FixedPointInteger5B,
 		'yaw': common.types.complex.Angle,
 		'pitch': common.types.complex.Angle,
 		'on_ground': common.types.common.Boolean,

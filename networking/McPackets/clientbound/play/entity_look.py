@@ -6,12 +6,15 @@ from networking.McPackets import SimplePacket
 class EntityLook(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'yaw': common.types.complex.Angle,
-		'pitch': common.types.complex.Angle,
-		'on_ground': common.types.common.Boolean,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'yaw': common.types.complex.Angle,
+			'pitch': common.types.complex.Angle,
+			'on_ground': common.types.common.Boolean,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -22,4 +25,8 @@ class EntityLook(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x16
+		if self.context.protocol_version >= 107:
+			return 0x27
+		if self.context.protocol_version == 47:
+			return 0x16
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

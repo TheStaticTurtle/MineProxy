@@ -6,13 +6,16 @@ from networking.McPackets import SimplePacket
 class EntityRelativeMove(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'delta_x': common.types.common.Byte,
-		'delta_y': common.types.common.Byte,
-		'delta_z': common.types.common.Byte,
-		'on_ground': common.types.common.Boolean,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'delta_x': common.types.common.Short if self.context.protocol_version >= 107 else common.types.common.Byte,
+			'delta_y': common.types.common.Short if self.context.protocol_version >= 107 else common.types.common.Byte,
+			'delta_z': common.types.common.Short if self.context.protocol_version >= 107 else common.types.common.Byte,
+			'on_ground': common.types.common.Boolean,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -24,4 +27,8 @@ class EntityRelativeMove(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x15
+		if self.context.protocol_version >= 107:
+			return 0x25
+		if self.context.protocol_version == 47:
+			return 0x15
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

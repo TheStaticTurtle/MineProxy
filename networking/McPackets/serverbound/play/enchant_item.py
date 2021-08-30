@@ -7,10 +7,13 @@ from common import types
 class EnchantItem(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'window_id': common.types.common.Byte,
-		'enchantment': common.types.common.Byte,
-	}
+
+	@property
+	def STRUCTURE(self):
+		return {
+			'window_id': common.types.common.Byte,
+			'enchantment': common.types.common.Byte,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -19,4 +22,8 @@ class EnchantItem(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x11
+		if self.context.protocol_version >= 107:
+			return 0x06
+		if self.context.protocol_version == 47:
+			return 0x11
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

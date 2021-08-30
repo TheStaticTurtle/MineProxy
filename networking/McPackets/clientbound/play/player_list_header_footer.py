@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class PlayerListHeaderAndFooter(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'header': common.types.complex.JSONString,
 		'footer': common.types.complex.JSONString,
 	}

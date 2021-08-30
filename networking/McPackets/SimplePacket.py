@@ -18,7 +18,10 @@ def create_simple_packet(context: Context, packet_id: int, packet_data: bytes):
 class Packet:
 	TYPE = McPacketType.Unknown
 	SUBTYPE = McState.Unknown
-	STRUCTURE = {
+
+	@property
+	def STRUCTURE(self):
+		return {
 	}
 	STRUCTURE_REPR_HIDDEN_FIELDS = []
 
@@ -46,12 +49,12 @@ class Packet:
 	@classmethod
 	def from_buffer(cls, context, buffer):
 		new_packet = cls(context)
-		for key in cls.STRUCTURE.keys():
+		for key in new_packet.STRUCTURE.keys():
 			try:
-				value, _ = cls.STRUCTURE[key].read(context, buffer)
+				value, _ = new_packet.STRUCTURE[key].read(context, buffer)
 				new_packet.__setattr__(key, value)
 			except Exception as e:
-				raise RuntimeError(f"{new_packet.NAME}: Error while reading key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
+				raise RuntimeError(f"{new_packet.NAME}: Error while reading key {key} for type {new_packet.STRUCTURE[key].__class__.__name__}: {str(e)}")
 
 		new_packet.apply_meta_fields()
 		return new_packet

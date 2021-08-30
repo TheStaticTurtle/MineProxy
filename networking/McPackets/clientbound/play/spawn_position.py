@@ -6,7 +6,10 @@ from common import types
 class SpawnPosition(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'location': common.types.complex.Position,
 	}
 

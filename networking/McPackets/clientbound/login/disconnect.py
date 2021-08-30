@@ -6,7 +6,10 @@ from common import types
 class Disconnect(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+
+	@property
+	def STRUCTURE(self):
+		return {
 		'reason': common.types.complex.JSONString,
 	}
 

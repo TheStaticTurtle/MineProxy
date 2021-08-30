@@ -6,7 +6,10 @@ from common import types
 class TimeUpdate(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'world_age': common.types.common.Long,
 		'time_of_day': common.types.common.Long,
 	}

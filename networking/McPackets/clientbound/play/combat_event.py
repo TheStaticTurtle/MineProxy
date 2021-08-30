@@ -8,13 +8,16 @@ from networking.McPackets.Buffer import Buffer
 class CombatEvent(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'event': common.types.complex.CombatEventEventEnum,
-		'duration': common.types.common.VarInt,
-		'player_id': common.types.common.VarInt,
-		'entity_id': common.types.common.Integer,
-		'message': common.types.common.String,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'event': common.types.complex.CombatEventEventEnum,
+			'duration': common.types.common.VarInt,
+			'player_id': common.types.common.VarInt,
+			'entity_id': common.types.common.Integer,
+			'message': common.types.common.String,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -26,7 +29,11 @@ class CombatEvent(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x42
+		if self.context.protocol_version >= 107:
+			return 0x2C
+		if self.context.protocol_version == 47:
+			return 0x42
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	@classmethod
 	def from_basic_packet(cls, packet):
@@ -36,15 +43,15 @@ class CombatEvent(SimplePacket.Packet):
 
 		new_packet = cls(packet.context)
 		try:
-			new_packet.event, _ = cls.STRUCTURE["event"].read(packet.context, buffer)
+			new_packet.event, _ = new_packet.STRUCTURE["event"].read(packet.context, buffer)
 			if new_packet.event == CombatEventEvent.EndCombat:
-				new_packet.duration, _ = cls.STRUCTURE["duration"].read(packet.context, buffer)
+				new_packet.duration, _ = new_packet.STRUCTURE["duration"].read(packet.context, buffer)
 			if new_packet.event == CombatEventEvent.EntityDead:
-				new_packet.player_id, _ = cls.STRUCTURE["player_id"].read(packet.context, buffer)
+				new_packet.player_id, _ = new_packet.STRUCTURE["player_id"].read(packet.context, buffer)
 			if new_packet.event in [CombatEventEvent.EndCombat, CombatEventEvent.EntityDead]:
-				new_packet.entity_id, _ = cls.STRUCTURE["entity_id"].read(packet.context, buffer)
+				new_packet.entity_id, _ = new_packet.STRUCTURE["entity_id"].read(packet.context, buffer)
 			if new_packet.event == CombatEventEvent.EntityDead:
-				new_packet.message, _ = cls.STRUCTURE["message"].read(packet.context, buffer)
+				new_packet.message, _ = new_packet.STRUCTURE["message"].read(packet.context, buffer)
 
 		except Exception as e:
 			raise RuntimeError(f"{new_packet.NAME}: Error while writing key: {str(e)}")

@@ -7,9 +7,12 @@ from common import types
 class HeldItemChange(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'slot': common.types.common.Short,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'slot': common.types.common.Short,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -17,4 +20,8 @@ class HeldItemChange(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x09
+		if self.context.protocol_version >= 107:
+			return 0x17
+		if self.context.protocol_version == 47:
+			return 0x09
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

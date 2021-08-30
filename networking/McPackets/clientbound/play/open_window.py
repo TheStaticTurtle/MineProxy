@@ -8,13 +8,16 @@ from networking.McPackets.Buffer import Buffer
 class OpenWindow(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'window_id': common.types.common.UnsignedByte,
-		'window_type': common.types.common.String,
-		'window_title': common.types.complex.JSONString,
-		'umber_of_slots': common.types.common.UnsignedByte,
-		# 'entity_id': common.types.common.Integer,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'window_id': common.types.common.UnsignedByte,
+			'window_type': common.types.common.String,
+			'window_title': common.types.complex.JSONString,
+			'umber_of_slots': common.types.common.UnsignedByte,
+			# 'entity_id': common.types.common.Integer,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -26,7 +29,11 @@ class OpenWindow(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x2D
+		if self.context.protocol_version >= 107:
+			return 0x13
+		if self.context.protocol_version == 47:
+			return 0x2D
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	@classmethod
 	def from_basic_packet(cls, packet):
@@ -35,12 +42,12 @@ class OpenWindow(SimplePacket.Packet):
 		buffer.reset_cursor()
 
 		new_packet = cls(packet.context)
-		for key in cls.STRUCTURE.keys():
+		for key in new_packet.STRUCTURE.keys():
 			try:
-				value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
+				value, _ = new_packet.STRUCTURE[key].read(packet.context, buffer)
 				new_packet.__setattr__(key, value)
 			except Exception as e:
-				raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
+				raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {new_packet.STRUCTURE[key].__class__.__name__}: {str(e)}")
 
 		if new_packet.window_type == "EntityHorse":
 			new_packet.entity_id, _ = common.types.common.Integer.read(packet.context, buffer)

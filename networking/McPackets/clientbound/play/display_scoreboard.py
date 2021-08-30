@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class DisplayScoreboard(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'position': common.types.complex.ScoreboardPositionEnum,
 		'score_name': common.types.common.String,
 	}

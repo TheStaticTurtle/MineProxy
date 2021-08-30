@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class UpdateScore(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'score_name': common.types.common.String,
 		'action': common.types.common.Byte,
 		'objective_name': common.types.common.String,
@@ -35,11 +38,11 @@ class UpdateScore(SimplePacket.Packet):
 
 		new_packet = cls(packet.context)
 		try:
-			new_packet.score_name, _ = cls.STRUCTURE["score_name"].read(packet.context, buffer)
-			new_packet.action, _ = cls.STRUCTURE["action"].read(packet.context, buffer)
-			new_packet.objective_name, _ = cls.STRUCTURE["objective_name"].read(packet.context, buffer)
+			new_packet.score_name, _ = new_packet.STRUCTURE["score_name"].read(packet.context, buffer)
+			new_packet.action, _ = new_packet.STRUCTURE["action"].read(packet.context, buffer)
+			new_packet.objective_name, _ = new_packet.STRUCTURE["objective_name"].read(packet.context, buffer)
 			if new_packet.action != 1:
-				new_packet.value, _ = cls.STRUCTURE["value"].read(packet.context, buffer)
+				new_packet.value, _ = new_packet.STRUCTURE["value"].read(packet.context, buffer)
 
 		except Exception as e:
 			raise RuntimeError(f"{new_packet.NAME}: Error while writing key: {str(e)}")

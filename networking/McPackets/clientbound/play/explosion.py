@@ -6,16 +6,19 @@ from networking.McPackets import SimplePacket
 class Explosion(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'x': common.types.common.Float,
-		'y': common.types.common.Float,
-		'z': common.types.common.Float,
-		'radius': common.types.common.Float,
-		'records': common.types.complex.ExplosionRecordArray,
-		'player_motion_x': common.types.common.Float,
-		'player_motion_y': common.types.common.Float,
-		'player_motion_z': common.types.common.Float,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'x': common.types.common.Float,
+			'y': common.types.common.Float,
+			'z': common.types.common.Float,
+			'radius': common.types.common.Float,
+			'records': common.types.complex.ExplosionRecordArray,
+			'player_motion_x': common.types.common.Float,
+			'player_motion_y': common.types.common.Float,
+			'player_motion_z': common.types.common.Float,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -30,4 +33,8 @@ class Explosion(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x27
+		if self.context.protocol_version >= 107:
+			return 0x1C
+		if self.context.protocol_version == 47:
+			return 0x27
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

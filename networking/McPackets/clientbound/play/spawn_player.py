@@ -6,17 +6,20 @@ from networking.McPackets import SimplePacket
 class SpawnPlayer(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'player_uuid': common.types.common.UUID,
-		'x': common.types.common.Integer,
-		'y': common.types.common.Integer,
-		'z': common.types.common.Integer,
-		'yaw': common.types.complex.Float,
-		'pitch': common.types.complex.Float,
-		'current_item': common.types.common.Short,
-		'metadata': common.types.complex.EntityMetadata,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'player_uuid': common.types.common.UUID,
+			'x': common.types.common.Integer,
+			'y': common.types.common.Integer,
+			'z': common.types.common.Integer,
+			'yaw': common.types.complex.Float,
+			'pitch': common.types.complex.Float,
+			'current_item': common.types.common.Short,
+			'metadata': common.types.complex.EntityMetadata,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -32,4 +35,8 @@ class SpawnPlayer(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x0C
+		if self.context.protocol_version >= 107:
+			return 0x05
+		if self.context.protocol_version == 47:
+			return 0x0C
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

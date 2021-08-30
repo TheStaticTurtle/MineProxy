@@ -6,7 +6,10 @@ from common import types
 class Start(SimplePacket.Packet):
 	TYPE = McPacketType.ServerBound
 	SUBTYPE = McState.Login
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'name': common.types.common.String,
 	}
 

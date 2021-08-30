@@ -8,7 +8,10 @@ from networking.McPackets.Buffer import Buffer
 class Teams(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
+	
+	@property
+	def STRUCTURE(self):
+		return {
 		'team_name': common.types.common.String,
 		'mode': common.types.common.Byte,
 		'team_display_name': common.types.common.String,
@@ -45,17 +48,17 @@ class Teams(SimplePacket.Packet):
 
 		new_packet = cls(packet.context)
 		try:
-			new_packet.team_name, _ = cls.STRUCTURE["team_name"].read(packet.context, buffer)
-			new_packet.mode, _ = cls.STRUCTURE["mode"].read(packet.context, buffer)
+			new_packet.team_name, _ = new_packet.STRUCTURE["team_name"].read(packet.context, buffer)
+			new_packet.mode, _ = new_packet.STRUCTURE["mode"].read(packet.context, buffer)
 			if new_packet.mode in [0, 2]:
-				new_packet.team_display_name, _ = cls.STRUCTURE["team_display_name"].read(packet.context, buffer)
-				new_packet.team_prefix, _ = cls.STRUCTURE["team_prefix"].read(packet.context, buffer)
-				new_packet.team_suffix, _ = cls.STRUCTURE["team_suffix"].read(packet.context, buffer)
-				new_packet.friendly_fire, _ = cls.STRUCTURE["friendly_fire"].read(packet.context, buffer)
-				new_packet.name_tag_visibility, _ = cls.STRUCTURE["name_tag_visibility"].read(packet.context, buffer)
-				new_packet.color, _ = cls.STRUCTURE["color"].read(packet.context, buffer)
+				new_packet.team_display_name, _ = new_packet.STRUCTURE["team_display_name"].read(packet.context, buffer)
+				new_packet.team_prefix, _ = new_packet.STRUCTURE["team_prefix"].read(packet.context, buffer)
+				new_packet.team_suffix, _ = new_packet.STRUCTURE["team_suffix"].read(packet.context, buffer)
+				new_packet.friendly_fire, _ = new_packet.STRUCTURE["friendly_fire"].read(packet.context, buffer)
+				new_packet.name_tag_visibility, _ = new_packet.STRUCTURE["name_tag_visibility"].read(packet.context, buffer)
+				new_packet.color, _ = new_packet.STRUCTURE["color"].read(packet.context, buffer)
 			if new_packet.mode in [0, 3, 4]:
-				new_packet.players, _ = cls.STRUCTURE["players"].read(packet.context, buffer)
+				new_packet.players, _ = new_packet.STRUCTURE["players"].read(packet.context, buffer)
 
 		except Exception as e:
 			raise RuntimeError(f"{new_packet.NAME}: Error while writing key: {str(e)}")

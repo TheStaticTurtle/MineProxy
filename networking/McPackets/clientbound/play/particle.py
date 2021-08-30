@@ -8,18 +8,21 @@ from networking.McPackets.Buffer import Buffer
 class Particle(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'particle_id': common.types.common.Integer,
-		'long_distance': common.types.common.Boolean,
-		'x': common.types.common.Float,
-		'y': common.types.common.Float,
-		'z': common.types.common.Float,
-		'offset_x': common.types.common.Float,
-		'offset_y': common.types.common.Float,
-		'offset_z': common.types.common.Float,
-		'particle_data': common.types.common.Float,
-		'particle_count': common.types.common.Integer,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'particle_id': common.types.common.Integer,
+			'long_distance': common.types.common.Boolean,
+			'x': common.types.common.Float,
+			'y': common.types.common.Float,
+			'z': common.types.common.Float,
+			'offset_x': common.types.common.Float,
+			'offset_y': common.types.common.Float,
+			'offset_z': common.types.common.Float,
+			'particle_data': common.types.common.Float,
+			'particle_count': common.types.common.Integer,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -37,7 +40,11 @@ class Particle(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x2A
+		if self.context.protocol_version >= 107:
+			return 0x22
+		if self.context.protocol_version == 47:
+			return 0x2A
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	def __repr__(self):
 		return f"<{self.NAME} particle_id={self.particle_id} long_distance={self.long_distance} x={self.x} y={self.y} z={self.z} offset_x={self.offset_x} offset_y={self.offset_y} offset_z={self.offset_z} particle_data={self.particle_data} particle_count={self.particle_count} data={self.data}>"
@@ -49,12 +56,12 @@ class Particle(SimplePacket.Packet):
 		buffer.reset_cursor()
 
 		new_packet = cls(packet.context)
-		for key in cls.STRUCTURE.keys():
+		for key in new_packet.STRUCTURE.keys():
 			try:
-				value, _ = cls.STRUCTURE[key].read(packet.context, buffer)
+				value, _ = new_packet.STRUCTURE[key].read(packet.context, buffer)
 				new_packet.__setattr__(key, value)
 			except Exception as e:
-				raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {cls.STRUCTURE[key].__class__.__name__}: {str(e)}")
+				raise RuntimeError(f"{new_packet.NAME}: Error while writing key {key} for type {new_packet.STRUCTURE[key].__class__.__name__}: {str(e)}")
 
 		data_varint_count = 0
 		if new_packet.particle_id in [36]:

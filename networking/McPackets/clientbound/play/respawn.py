@@ -6,12 +6,15 @@ from common import types
 class Respawn(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'dimension': common.types.common.Integer,
-		'difficulty': common.types.common.UnsignedByte,
-		'gamemode': common.types.common.UnsignedByte,
-		'level_type': common.types.common.String,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'dimension': common.types.common.Integer,
+			'difficulty': common.types.common.UnsignedByte,
+			'gamemode': common.types.common.UnsignedByte,
+			'level_type': common.types.common.String,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -22,4 +25,8 @@ class Respawn(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x07
+		if self.context.protocol_version >= 107:
+			return 0x33
+		if self.context.protocol_version == 47:
+			return 0x07
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

@@ -6,10 +6,13 @@ from networking.McPackets import SimplePacket
 class BlockChange(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'location': common.types.complex.Position,
-		'block_id': common.types.common.VarInt,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'location': common.types.complex.Position,
+			'block_id': common.types.common.VarInt,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -18,4 +21,8 @@ class BlockChange(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x23
+		if self.context.protocol_version >= 107:
+			return 0x0B
+		if self.context.protocol_version == 47:
+			return 0x23
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

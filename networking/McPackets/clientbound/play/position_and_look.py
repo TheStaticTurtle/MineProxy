@@ -3,17 +3,20 @@ from common.types.enums import McState, McPacketType
 from networking.McPackets import SimplePacket
 
 
-class PositionAndLook(SimplePacket.Packet):
+class PositionAndLook47(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'x': common.types.common.Double,
-		'y': common.types.common.Double,
-		'z': common.types.common.Double,
-		'yaw': common.types.common.Float,
-		'pitch': common.types.common.Float,
-		'flags': common.types.common.Byte,
-	}
+
+	@property
+	def STRUCTURE(self):
+		return {
+			'x': common.types.common.Double,
+			'y': common.types.common.Double,
+			'z': common.types.common.Double,
+			'yaw': common.types.common.Float,
+			'pitch': common.types.common.Float,
+			'flags': common.types.common.Byte,
+		}
 
 	FLAG_REL_X = 0x01
 	FLAG_REL_Y = 0x02
@@ -37,7 +40,9 @@ class PositionAndLook(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x08
+		if self.context.protocol_version == 47:
+			return 0x08
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 	def apply_meta_fields(self):
 		self.x_relative = bool(self.flags & self.FLAG_REL_X)
@@ -47,9 +52,43 @@ class PositionAndLook(SimplePacket.Packet):
 		self.pitch_relative = bool(self.flags & self.FLAG_REL_PITCH)
 
 	def __repr__(self):
-		x_str = ("~" if self.x_relative else "")+str(self.x)
-		y_str = ("~" if self.y_relative else "")+str(self.y)
-		z_str = ("~" if self.z_relative else "")+str(self.z)
-		yaw_str = ("~" if self.yaw_relative else "")+str(self.yaw)
-		pitch_str = ("~" if self.pitch_relative else "")+str(self.pitch)
+		x_str = ("~" if self.x_relative else "") + str(self.x)
+		y_str = ("~" if self.y_relative else "") + str(self.y)
+		z_str = ("~" if self.z_relative else "") + str(self.z)
+		yaw_str = ("~" if self.yaw_relative else "") + str(self.yaw)
+		pitch_str = ("~" if self.pitch_relative else "") + str(self.pitch)
 		return f"<{self.NAME} x={x_str} y={y_str} z={z_str} yaw={yaw_str} pitch={pitch_str}>"
+
+class PositionAndLook107(PositionAndLook47):
+	TYPE = McPacketType.Clientbound
+	SUBTYPE = McState.Play
+
+	@property
+	def STRUCTURE(self):
+		return {
+			'x': common.types.common.Double,
+			'y': common.types.common.Double,
+			'z': common.types.common.Double,
+			'yaw': common.types.common.Float,
+			'pitch': common.types.common.Float,
+			'flags': common.types.common.Byte,
+			'teleport_id': common.types.common.VarInt,
+		}
+
+	def __init__(self, context):
+		super().__init__(context)
+		self.teleport_id = None
+
+	@property
+	def ID(self):
+		if self.context.protocol_version >= 107:
+			return 0x2E
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
+
+	def __repr__(self):
+		x_str = ("~" if self.x_relative else "") + str(self.x)
+		y_str = ("~" if self.y_relative else "") + str(self.y)
+		z_str = ("~" if self.z_relative else "") + str(self.z)
+		yaw_str = ("~" if self.yaw_relative else "") + str(self.yaw)
+		pitch_str = ("~" if self.pitch_relative else "") + str(self.pitch)
+		return f"<{self.NAME} x={x_str} y={y_str} z={z_str} yaw={yaw_str} pitch={pitch_str} teleport_id={self.teleport_id}>"

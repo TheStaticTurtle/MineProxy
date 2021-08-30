@@ -8,11 +8,14 @@ from networking.McPackets.Buffer import Buffer
 class ConfirmTransaction(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'window_id': common.types.common.UnsignedByte,
-		'action_number': common.types.common.Short,
-		'accepted': common.types.common.Boolean,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'window_id': common.types.common.Byte if self.context.protocol_version >= 107 else common.types.common.UnsignedByte,
+			'action_number': common.types.common.Short,
+			'accepted': common.types.common.Boolean,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -22,4 +25,8 @@ class ConfirmTransaction(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x32
+		if self.context.protocol_version >= 107:
+			return 0x11
+		if self.context.protocol_version == 47:
+			return 0x32
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

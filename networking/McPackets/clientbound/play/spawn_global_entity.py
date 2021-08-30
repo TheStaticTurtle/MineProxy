@@ -6,13 +6,16 @@ from networking.McPackets import SimplePacket
 class SpawnGlobalEntity(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'type': common.types.common.Byte,
-		'x': common.types.common.Integer,
-		'y': common.types.common.Integer,
-		'z': common.types.common.Integer,
-	}
+	
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'type': common.types.common.Byte,
+			'x': common.types.common.Integer,
+			'y': common.types.common.Integer,
+			'z': common.types.common.Integer,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -24,4 +27,8 @@ class SpawnGlobalEntity(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x2C
+		if self.context.protocol_version >= 107:
+			return 0x02
+		if self.context.protocol_version == 47:
+			return 0x2C
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

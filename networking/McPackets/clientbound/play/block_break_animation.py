@@ -6,11 +6,14 @@ from networking.McPackets import SimplePacket
 class BlockBreakAnimation(SimplePacket.Packet):
 	TYPE = McPacketType.Clientbound
 	SUBTYPE = McState.Play
-	STRUCTURE = {
-		'entity_id': common.types.common.VarInt,
-		'location': common.types.complex.Position,
-		'destroy_stage': common.types.common.Byte,
-	}
+
+	@property
+	def STRUCTURE(self):
+		return {
+			'entity_id': common.types.common.VarInt,
+			'location': common.types.complex.Position,
+			'destroy_stage': common.types.common.Byte,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -20,4 +23,8 @@ class BlockBreakAnimation(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x25
+		if self.context.protocol_version >= 107:
+			return 0x08
+		if self.context.protocol_version == 47:
+			return 0x25
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

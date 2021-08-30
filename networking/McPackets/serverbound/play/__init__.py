@@ -1,3 +1,4 @@
+# From V47
 from .keep_alive import KeepAlive
 from .chat_message import ChatMessage
 from .use_entity import UseEntity
@@ -24,3 +25,9 @@ from .client_status import ClientStatus
 from .plugin_message import PluginMessage
 from .spectate import Spectate
 from .ressource_pack_status import ResourcePackStatus
+
+# From V107
+from .teleport_confirm import TeleportConfirm
+from .vehicle_move import VehicleMove
+from .steer_boat import SteerBoat
+from .use_item import UseItem
