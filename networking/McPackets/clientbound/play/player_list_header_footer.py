@@ -12,9 +12,9 @@ class PlayerListHeaderAndFooter(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'header': common.types.complex.JSONString,
-		'footer': common.types.complex.JSONString,
-	}
+			'header': common.types.complex.JSONString,
+			'footer': common.types.complex.JSONString,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -23,4 +23,8 @@ class PlayerListHeaderAndFooter(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x47
+		if self.context.protocol_version >= 107:
+			return 0x48
+		if self.context.protocol_version == 47:
+			return 0x47
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

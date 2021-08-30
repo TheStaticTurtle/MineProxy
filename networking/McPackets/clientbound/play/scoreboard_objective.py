@@ -12,11 +12,11 @@ class ScoreboardObjective(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'objective_name': common.types.common.String,
-		'mode': common.types.common.Byte,
-		'objective_value': common.types.common.String,
-		'type': common.types.common.String,
-	}
+			'objective_name': common.types.common.String,
+			'mode': common.types.common.Byte,
+			'objective_value': common.types.common.String,
+			'type': common.types.common.String,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -27,7 +27,11 @@ class ScoreboardObjective(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x3B
+		if self.context.protocol_version >= 107:
+			return 0x3F
+		if self.context.protocol_version == 47:
+			return 0x3B
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 
 	@classmethod

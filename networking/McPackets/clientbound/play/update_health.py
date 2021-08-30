@@ -10,10 +10,10 @@ class UpdateHealth(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'health': common.types.common.Float,
-		'food': common.types.common.VarInt,
-		'food_saturation': common.types.common.Float,
-	}
+			'health': common.types.common.Float,
+			'food': common.types.common.VarInt,
+			'food_saturation': common.types.common.Float,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -23,4 +23,8 @@ class UpdateHealth(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x06
+		if self.context.protocol_version >= 107:
+			return 0x3E
+		if self.context.protocol_version == 47:
+			return 0x06
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

@@ -12,12 +12,12 @@ class UpdateSign(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'location': common.types.complex.Position,
-		'line1': common.types.common.String,
-		'line2': common.types.common.String,
-		'line3': common.types.common.String,
-		'line4': common.types.common.String,
-	}
+			'location': common.types.complex.Position,
+			'line1': common.types.complex.JSONString if self.context.protocol_version >= 107 else common.types.common.String,
+			'line2': common.types.complex.JSONString if self.context.protocol_version >= 107 else common.types.common.String,
+			'line3': common.types.complex.JSONString if self.context.protocol_version >= 107 else common.types.common.String,
+			'line4': common.types.complex.JSONString if self.context.protocol_version >= 107 else common.types.common.String,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -29,4 +29,8 @@ class UpdateSign(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x33
+		if self.context.protocol_version >= 107:
+			return 0x46
+		if self.context.protocol_version == 47:
+			return 0x33
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

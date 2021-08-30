@@ -11,10 +11,10 @@ class EntityEquipment(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'entity_id': common.types.common.VarInt,
-		'slot': common.types.common.Short,
-		'item': common.types.complex.Slot,
-	}
+			'entity_id': common.types.common.VarInt,
+			'slot': common.types.common.VarInt if self.context.protocol_version >= 107 else common.types.common.Short,
+			'item': common.types.complex.Slot,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -24,4 +24,8 @@ class EntityEquipment(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x04
+		if self.context.protocol_version >= 107:
+			return 0x3C
+		if self.context.protocol_version == 47:
+			return 0x04
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

@@ -13,11 +13,11 @@ class EntityVelocity(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'entity_id': common.types.common.VarInt,
-		'velocity_x': common.types.complex.VelocityShort,
-		'velocity_y': common.types.complex.VelocityShort,
-		'velocity_z': common.types.complex.VelocityShort,
-	}
+			'entity_id': common.types.common.VarInt,
+			'velocity_x': common.types.complex.VelocityShort,
+			'velocity_y': common.types.complex.VelocityShort,
+			'velocity_z': common.types.complex.VelocityShort,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -28,4 +28,8 @@ class EntityVelocity(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x12
+		if self.context.protocol_version >= 107:
+			return 0x3B
+		if self.context.protocol_version == 47:
+			return 0x12
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

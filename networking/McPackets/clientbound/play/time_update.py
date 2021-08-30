@@ -10,9 +10,9 @@ class TimeUpdate(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'world_age': common.types.common.Long,
-		'time_of_day': common.types.common.Long,
-	}
+			'world_age': common.types.common.Long,
+			'time_of_day': common.types.common.Long,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -21,5 +21,9 @@ class TimeUpdate(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x03
+		if self.context.protocol_version >= 107:
+			return 0x44
+		if self.context.protocol_version == 47:
+			return 0x03
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 

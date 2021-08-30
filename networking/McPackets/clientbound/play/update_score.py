@@ -12,11 +12,11 @@ class UpdateScore(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'score_name': common.types.common.String,
-		'action': common.types.common.Byte,
-		'objective_name': common.types.common.String,
-		'value': common.types.common.VarInt,
-	}
+			'score_name': common.types.common.String,
+			'action': common.types.common.Byte,
+			'objective_name': common.types.common.String,
+			'value': common.types.common.VarInt,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -27,7 +27,11 @@ class UpdateScore(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x3C
+		if self.context.protocol_version >= 107:
+			return 0x42
+		if self.context.protocol_version == 47:
+			return 0x3C
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")
 
 
 	@classmethod

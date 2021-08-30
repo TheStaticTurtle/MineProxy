@@ -10,9 +10,9 @@ class EntityMetadata(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'entity_id': common.types.common.VarInt,
-		'metadata': common.types.complex.EntityMetadata,
-	}
+			'entity_id': common.types.common.VarInt,
+			'metadata': common.types.complex.EntityMetadata,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -21,4 +21,8 @@ class EntityMetadata(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x1C
+		if self.context.protocol_version >= 107:
+			return 0x39
+		if self.context.protocol_version == 47:
+			return 0x1C
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

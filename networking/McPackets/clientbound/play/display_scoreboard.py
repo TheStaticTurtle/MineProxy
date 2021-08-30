@@ -12,9 +12,9 @@ class DisplayScoreboard(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'position': common.types.complex.ScoreboardPositionEnum,
-		'score_name': common.types.common.String,
-	}
+			'position': common.types.complex.ScoreboardPositionEnum,
+			'score_name': common.types.common.String,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -23,4 +23,8 @@ class DisplayScoreboard(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x3D
+		if self.context.protocol_version >= 107:
+			return 0x38
+		if self.context.protocol_version == 47:
+			return 0x3D
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

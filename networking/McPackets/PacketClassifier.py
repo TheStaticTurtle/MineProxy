@@ -4,23 +4,22 @@ from common.types.enums import McState
 from networking.McPackets.protocol_migrations import proto47, proto107
 
 
-def merge_dicts_rec(*kwarg):
-	out = {}
-	for t in kwarg:
-		for key in t.keys():
-			if key in out:
-				if isinstance(t[key], dict) and isinstance(out[key], dict):
-					out[key] = merge_dicts_rec(out[key], t[key])
-				else:
-					out[key] = t[key]
-			else:
-				out[key] = t[key]
-	return out
+# def merge_dicts_rec(*kwarg):
+# 	out = {}
+# 	for t in kwarg:
+# 		for key in t.keys():
+# 			if key in out:
+# 				if isinstance(t[key], dict) and isinstance(out[key], dict):
+# 					out[key] = merge_dicts_rec(out[key], t[key])
+# 				else:
+# 					out[key] = t[key]
+# 			else:
+# 				out[key] = t[key]
+# 	return out
 
 class LutManager:
 	def __init__(self):
 		self.log = logging.getLogger("LutManager")
-		# self.lut_versions = [107]
 		self.lut_versions = [47, 107]
 		self.luts_serverbound = {
 			107: proto107.lut_serverbound,
@@ -34,15 +33,15 @@ class LutManager:
 	def get_highest_protocol_version(self, under=None):
 		return max([v for v in self.lut_versions if under is None or v <= under])
 
-	def get_lowest_protocol_version(self, over=None):
-		return min([v for v in self.lut_versions if over is None or v >= over])
-
-	def _get_all_luts_under_version(self, under, reverse=False):
-		self.lut_versions.sort(reverse=reverse)
-		versions = [v for v in self.lut_versions if v <= under]
-		cb_luts = [self.luts_clientbound[version] for version in versions]
-		sb_luts = [self.luts_serverbound[version] for version in versions]
-		return cb_luts, sb_luts
+	# def get_lowest_protocol_version(self, over=None):
+	# 	return min([v for v in self.lut_versions if over is None or v >= over])
+	#
+	# def _get_all_luts_under_version(self, under, reverse=False):
+	# 	self.lut_versions.sort(reverse=reverse)
+	# 	versions = [v for v in self.lut_versions if v <= under]
+	# 	cb_luts = [self.luts_clientbound[version] for version in versions]
+	# 	sb_luts = [self.luts_serverbound[version] for version in versions]
+	# 	return cb_luts, sb_luts
 
 	def get_luts_for_protocol_version(self, version):
 		max_v = self.get_highest_protocol_version(under=version)
@@ -52,10 +51,10 @@ class LutManager:
 			version = max_v
 
 		self.log.info(f"Generaton clientbound and servbound luts for version {version}")
-		cb_luts, sb_luts = self._get_all_luts_under_version(version, reverse=False)
+		# cb_luts, sb_luts = self._get_all_luts_under_version(version, reverse=False)
 
-		clientbound_lut = merge_dicts_rec(*cb_luts)
-		serverbound_lut = merge_dicts_rec(*sb_luts)
+		clientbound_lut = self.luts_clientbound[version]  # merge_dicts_rec(*cb_luts)
+		serverbound_lut = self.luts_serverbound[version]  # merge_dicts_rec(*sb_luts)
 
 		return serverbound_lut, clientbound_lut
 
@@ -65,7 +64,7 @@ class Classifier:
 		self.parse_play_packets = parse_play_packets
 		self.context.add_protocol_change_callback(self._update_lut)
 		self.manager = LutManager()
-		self._update_lut(version=self.manager.get_lowest_protocol_version())
+		self._update_lut(version=47)
 
 	def _update_lut(self, version=None):
 		if version:

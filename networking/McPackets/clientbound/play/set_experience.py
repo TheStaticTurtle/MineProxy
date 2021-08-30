@@ -10,10 +10,10 @@ class SetExperience(SimplePacket.Packet):
 	@property
 	def STRUCTURE(self):
 		return {
-		'experience_bar': common.types.common.Float,
-		'level': common.types.common.VarInt,
-		'total_experience': common.types.common.VarInt,
-	}
+			'experience_bar': common.types.common.Float,
+			'level': common.types.common.VarInt,
+			'total_experience': common.types.common.VarInt,
+		}
 
 	def __init__(self, context):
 		super().__init__(context)
@@ -23,4 +23,8 @@ class SetExperience(SimplePacket.Packet):
 
 	@property
 	def ID(self):
-		return 0x1F
+		if self.context.protocol_version >= 107:
+			return 0x3D
+		if self.context.protocol_version == 47:
+			return 0x1F
+		raise RuntimeError(f"Invalid protocol version for packet {self.__class__.__name__}")

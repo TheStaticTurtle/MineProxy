@@ -45,13 +45,11 @@ Generating a `EncryptionRequest` packet and login into online server does mean t
 All the basics allowing for packet decoding / encoding / compression and network encryption are implemented. Here is what is implemented  
 | Minecraft Version | Protocol Version | Coverage |  
 |-------------------|------------------|----------|  
-| 1.9               | [107](https://wiki.vg/index.php?title=Protocol&oldid=7617)              | Non-Play packets: All<br>Serverbound packets: All<br>Clientbound packets: None<br> |  
+| 1.9               | [107](https://wiki.vg/index.php?title=Protocol&oldid=7617)              | Non-Play packets: All<br>Serverbound packets: All<br>Clientbound packets: 75/81<br>Missing packets:<br>- `BossBar`<br>- `Map`<br>- `PlayerListItem`<br>- `WorldBorder`<br>- `Teams`<br>- `Title`  |  
 | 1.8 - 1.8.9       | [47](https://wiki.vg/index.php?title=Protocol&oldid=7368)               | Non-Play packets: All<br>Serverbound packets: All<br>Clientbound packets: 75/80<br>Missing packets:<br>- `MapChunkBulk`<br>- `Map`<br>- `PlayerListItem`<br>- `WorldBorder`<br>- `Title` |  
   
 ### Protocols migration ?  
-The base is V47 but let's imagine we want to support packets from protocol V109, instead of rewriting the entire packet table for the V109 we can just ignore packets like Handshake and don't add them in the V109 table. Instead, the script will find the closest version, in this case it's the V47 one  
-  
-A packet was removed from V47 in V109? Just set the packet ID to None, and it will be like it's not there.  
-  
+The base is V47 each protocl definition must be done in ``networking/McPackets/protocol_migration/protoXXXX.py`` this file contains a dict of packet_id/packet_class.
+This file needs to be imported in the ``PacketClassfier.py`` file and added in ``LutManager.__init__``
 ## License  
 See [LICENSE.md](https://github.com/TheStaticTurtle/MineProxy/blob/master/LICENSE.md)

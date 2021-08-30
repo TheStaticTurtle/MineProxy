@@ -80,3 +80,4 @@ from .unload_chunk import UnloadChunk
 from .chunk_data import ChunkDataV107
 from .vehicle_move import VehicleMove
 from .position_and_look import PositionAndLook107
+from .named_sound_effect import NamedSoundEffect
